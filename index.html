@@ -1,0 +1,3957 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Gastos del viaje</title>
+  <style>
+    @property --h {
+      syntax: "<number>";
+      inherits: true;
+      initial-value: 215;
+    }
+
+    :root {
+      --h: 215;
+      transition: --h 0.9s ease;
+
+      color-scheme: light dark;
+      --deep: #1d1d1f;
+      --fill: #f2f2f7;
+      --fill-hover: #ebebf0;
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --ink: #1d1d1f;
+      --muted: #6e6e73;
+      --muted-strong: #515154;
+      --line: #d2d2d7;
+      --line-soft: #e8e8ed;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --link: #0066cc;
+      --danger: #b3261e;
+
+      --c-transporte: #0071e3;
+      --d-transporte: #0a4f9e;
+      --t-transporte: #eaf3fe;
+      --b-transporte: #c9defa;
+
+      --c-alojamiento: #248a3d;
+      --d-alojamiento: #17642c;
+      --t-alojamiento: #e8f6ec;
+      --b-alojamiento: #c1e4cc;
+
+      --c-excursion: #d4700a;
+      --d-excursion: #8a4a00;
+      --t-excursion: #fff2df;
+      --b-excursion: #f6d9ab;
+    }
+
+    .transporte { --c: var(--c-transporte); --d: var(--d-transporte); --t: var(--t-transporte); --b: var(--b-transporte); }
+    .alojamiento { --c: var(--c-alojamiento); --d: var(--d-alojamiento); --t: var(--t-alojamiento); --b: var(--b-alojamiento); }
+    .excursion { --c: var(--c-excursion); --d: var(--d-excursion); --t: var(--t-excursion); --b: var(--b-excursion); }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Inter, system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.47;
+      letter-spacing: -0.011em;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 0 22px; }
+
+    .icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .chip-i {
+      flex: none;
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--c);
+      color: #fff;
+    }
+    .chip-i .icon { width: 18px; height: 18px; }
+
+    /* ---------- Barra superior ---------- */
+
+    /* ---------- Cabecera ---------- */
+    .hero {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      padding: 76px 0 48px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -20% -10% 0;
+      z-index: -1;
+      background:
+        radial-gradient(38% 55% at 18% 14%, hsl(var(--h) 95% 84% / 0.9), transparent 70%),
+        radial-gradient(34% 50% at 82% 6%, hsl(calc(var(--h) + 55) 95% 86% / 0.8), transparent 70%),
+        radial-gradient(30% 45% at 62% 62%, hsl(calc(var(--h) - 45) 90% 90% / 0.7), transparent 70%);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto 0 0;
+      height: 150px;
+      z-index: -1;
+      background: linear-gradient(rgba(245, 245, 247, 0), var(--bg));
+    }
+
+    .eyebrow {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--link);
+    }
+
+    .dest-row {
+      display: flex;
+      align-items: center;
+      gap: 0.22em;
+      font-size: clamp(2.6rem, 9vw, 6rem);
+      font-weight: 700;
+      letter-spacing: -0.045em;
+      line-height: 1.08;
+    }
+
+    .autosize {
+      display: inline-grid;
+      min-width: 0;
+      max-width: calc(100% - 1.5em);
+      overflow: hidden;
+      border-bottom: 3px solid transparent;
+      transition: border-color 0.2s;
+    }
+    .autosize:hover { border-bottom-color: rgba(0, 0, 0, 0.1); }
+    .autosize:focus-within { border-bottom-color: var(--accent); }
+
+    .autosize::after {
+      content: attr(data-value) " ";
+      grid-area: 1 / 1;
+      visibility: hidden;
+      white-space: pre;
+    }
+
+    .autosize input {
+      grid-area: 1 / 1;
+      width: 100%;
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font: inherit;
+      letter-spacing: inherit;
+      caret-color: var(--accent);
+    }
+    .autosize input::placeholder { color: #8e8e93; opacity: 1; }
+
+    .flag {
+      display: inline-flex;
+      align-items: center;
+      flex: none;
+    }
+    .flag img {
+      display: block;
+      height: clamp(34px, 6vw, 60px);
+      width: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 6px 18px rgba(0, 0, 0, 0.18);
+    }
+    .flag-emoji { font-size: 0.8em; line-height: 1; }
+    .flag.pop { animation: flag-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    @keyframes flag-pop {
+      from { opacity: 0; transform: scale(0.5) rotate(-10deg); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+    .pill {
+      padding: 7px 15px;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    /* ---------- Resumen ---------- */
+    .stats {
+      display: grid;
+      grid-template-columns: 1.35fr repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 64px;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 22px;
+      border-radius: 22px;
+      background: var(--surface);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .stat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .stat-label { font-size: 0.88rem; font-weight: 600; color: var(--muted-strong); }
+    .stat strong {
+      font-size: 1.8rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      font-variant-numeric: tabular-nums;
+      line-height: 1.15;
+    }
+    .stat-sub { font-size: 0.84rem; color: var(--muted); }
+
+    .stat.total { background: var(--deep); color: #fff; justify-content: flex-end; }
+    .stat.total .stat-label, .stat.total .stat-sub { color: #d2d2d7; }
+    .stat.total strong { font-size: 2.4rem; }
+
+    .bar { height: 6px; margin-top: 8px; border-radius: 99px; background: rgba(0, 0, 0, 0.08); overflow: hidden; }
+    .bar i { display: block; width: 0; height: 100%; border-radius: 99px; background: var(--c); transition: width 0.7s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+    /* ---------- Secciones ---------- */
+    .section { margin-bottom: 64px; }
+    .section-head { margin-bottom: 24px; }
+    .section-head h2 {
+      margin: 0 0 6px;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: -0.035em;
+      line-height: 1.12;
+    }
+    .section-head p { margin: 0; font-size: 1.08rem; color: var(--muted); }
+
+    .card {
+      background: var(--surface);
+      border-radius: 28px;
+      padding: 32px;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.04), 0 18px 40px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ---------- Botones ---------- */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      height: 50px;
+      padding: 0 30px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(0.98); }
+    .btn:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.5); outline-offset: 3px; }
+    .btn .icon { width: 18px; height: 18px; stroke-width: 2.2; }
+
+    .btn-tint {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(0, 113, 227, 0.1);
+      color: var(--d-transporte);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-tint:hover { background: rgba(0, 113, 227, 0.18); }
+    .btn-tint:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.5); outline-offset: 2px; }
+    .btn-tint .icon { width: 16px; height: 16px; stroke-width: 2.2; }
+
+    .btn-link {
+      padding: 4px 2px;
+      border: 0;
+      background: none;
+      color: var(--link);
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-link:hover { text-decoration: underline; }
+    .btn-link.danger { color: var(--danger); }
+    .btn-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+    /* ---------- Viajeros ---------- */
+    .trav-list { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 18px; padding: 0; }
+    .trav-list:empty { display: none; }
+
+    .trav {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 8px 6px 6px;
+      border-radius: 999px;
+      background: #f5f5f7;
+      border: 1px solid var(--line-soft);
+      font-weight: 600;
+    }
+
+    .avatar {
+      flex: none;
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--av, #515154);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .trav button {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--muted-strong);
+      cursor: pointer;
+    }
+    .trav button:hover { background: #e5e5ea; color: var(--ink); }
+    .trav button:focus-visible { outline: 2px solid var(--accent); }
+    .trav button .icon { width: 14px; height: 14px; stroke-width: 2.4; }
+
+    .inline-add { display: flex; gap: 10px; max-width: 480px; }
+    .inline-add input { flex: 1; }
+
+    .msg { margin: 12px 2px 0; font-size: 0.88rem; color: var(--muted-strong); }
+    .msg:empty { display: none; }
+    .msg.err { color: var(--danger); font-weight: 600; }
+
+    /* ---------- Selector de tipo ---------- */
+    fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      padding: 4px;
+      border-radius: 16px;
+      background: rgba(118, 118, 128, 0.12);
+    }
+
+    .seg { position: relative; display: block; cursor: pointer; }
+    .seg input {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+    .seg input:disabled { cursor: not-allowed; }
+    .seg > span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      height: 46px;
+      border-radius: 12px;
+      font-weight: 600;
+      color: var(--muted-strong);
+      transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+    .seg:hover > span { color: var(--ink); }
+    .seg input:disabled + span { opacity: 0.45; }
+    .seg input:checked + span {
+      background: #fff;
+      color: var(--d);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+    }
+    .seg input:checked + span .icon { color: var(--c); }
+    .seg input:focus-visible + span { outline: 3px solid rgba(0, 113, 227, 0.5); outline-offset: 2px; }
+
+    .hint { margin: 14px 2px 0; font-size: 0.93rem; color: var(--muted); }
+
+    .edit-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding: 12px 18px;
+      border-radius: 16px;
+      background: var(--t-transporte);
+      border: 1px solid var(--b-transporte);
+      color: var(--d-transporte);
+      font-weight: 600;
+    }
+
+    #details { margin-top: 32px; }
+
+    .group-title {
+      margin: 0 0 14px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .panel {
+      margin-bottom: 32px;
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid var(--line-soft);
+      background: #fbfbfd;
+    }
+
+    .panel-head { display: flex; align-items: center; gap: 14px; margin-bottom: 22px; }
+    .panel-head .chip-i { width: 38px; height: 38px; border-radius: 11px; }
+    .panel-head .chip-i .icon { width: 20px; height: 20px; }
+    .panel-head strong { display: block; font-size: 1.05rem; letter-spacing: -0.015em; }
+    .panel-head small { color: var(--muted); font-size: 0.88rem; }
+
+    .note { margin: 0; font-size: 0.88rem; color: var(--muted-strong); }
+
+    /* ---------- Rejilla de 12 columnas ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 18px 16px;
+      align-items: start;
+    }
+    .grid + .grid { margin-top: 18px; }
+
+    .s3 { grid-column: span 3; }
+    .s4 { grid-column: span 4; }
+    .s6 { grid-column: span 6; }
+    .s9 { grid-column: span 9; }
+    .s12 { grid-column: span 12; }
+
+    @media (max-width: 860px) {
+      .s3, .s4 { grid-column: span 6; }
+      .s9 { grid-column: span 6; }
+    }
+    @media (max-width: 540px) {
+      .s3, .s4, .s6, .s9 { grid-column: span 12; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+
+    .lbl {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      min-height: 1.3em;
+      font-size: 0.84rem;
+      color: #424245;
+      white-space: nowrap;
+    }
+    .lbl b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+    .lbl em { flex: none; font-style: normal; font-size: 0.76rem; color: var(--muted); }
+
+    .field input,
+    .field select,
+    .inline-add input {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      height: 46px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 1rem;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .field input::placeholder, .inline-add input::placeholder { color: #86868b; opacity: 1; }
+    .field input:hover, .field select:hover, .inline-add input:hover { border-color: #a1a1a6; }
+    .field input:focus, .field select:focus, .inline-add input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.2);
+    }
+    .field input:disabled, .field select:disabled { background: #f5f5f7; color: var(--muted); }
+
+    .field select,
+    .row-sel {
+      -webkit-appearance: none;
+      appearance: none;
+      padding-right: 38px;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23515154' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+
+    .money { position: relative; display: block; }
+    .money input { padding-right: 40px; -moz-appearance: textfield; appearance: textfield; }
+    .money input::-webkit-outer-spin-button,
+    .money input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .money::after {
+      content: "€";
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    /* Interruptor estilo iOS */
+    .switch {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 46px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .switch .track {
+      position: relative;
+      flex: none;
+      width: 51px;
+      height: 31px;
+      border-radius: 999px;
+      background: #aeaeb2;
+      transition: background 0.2s;
+    }
+    .switch .track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+      transition: transform 0.2s;
+    }
+    .switch input:checked + .track { background: #248a3d; }
+    .switch input:checked + .track::after { transform: translateX(20px); }
+    .switch input:focus-visible + .track { outline: 3px solid rgba(0, 113, 227, 0.5); outline-offset: 2px; }
+    .switch .txt { font-size: 0.95rem; color: var(--ink); }
+
+    .subhead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 18px;
+      border-top: 1px solid var(--b);
+      font-weight: 700;
+      color: var(--d);
+    }
+
+    .arrival-note { align-self: end; padding-bottom: 12px; }
+
+    /* ---------- Tabla agrupada por día ---------- */
+    .table-card { position: relative; padding: 12px 24px 24px; overflow-x: auto; }
+
+    table {
+      width: 100%;
+      min-width: 1020px;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    thead th {
+      padding: 14px 12px;
+      text-align: left;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted-strong);
+      white-space: nowrap;
+    }
+
+    /* La columna de acciones queda fija a la derecha: editar y borrar siempre alcanzables */
+    th.sticky-act, td.sticky-act { position: sticky; right: 0; }
+    thead th.sticky-act { background: var(--surface); }
+    tr.row td.sticky-act { background: var(--t); }
+
+    th.num, td.num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+    tr.row td {
+      padding: 18px 12px;
+      background: var(--t);
+      color: var(--ink);
+      border-bottom: 2px solid #fff;
+      vertical-align: middle;
+      font-size: 0.95rem;
+    }
+
+    tr.row:hover td:not(.day) { background: color-mix(in srgb, var(--t) 70%, var(--b)); }
+    tr.row.editing td:not(.day) { background: color-mix(in srgb, var(--t) 55%, var(--b)); }
+
+    tr.row.first td:last-child { border-top-right-radius: 18px; }
+    tr.row.last td:last-child { border-bottom-right-radius: 18px; }
+    tr.row.last td { border-bottom-color: transparent; }
+
+    tr.row td.day {
+      width: 118px;
+      padding: 16px 8px;
+      text-align: center;
+      vertical-align: middle;
+      background: var(--deep);
+      color: #fff;
+      border-radius: 18px 0 0 18px;
+      border-bottom: 0;
+    }
+    td.day .wd { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; color: #e5e5ea; }
+    td.day .dn { font-size: 2.7rem; font-weight: 700; line-height: 1.05; letter-spacing: -0.04em; color: #fff; }
+    td.day .mo { font-size: 0.88rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: #f2f2f7; }
+    td.day .sub {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.28);
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+    }
+
+    tr.spacer td { height: 14px; padding: 0; border: 0; background: transparent; }
+
+    .badge { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; color: var(--d); }
+    .badge .chip-i { width: 30px; height: 30px; border-radius: 9px; }
+    .badge .chip-i .icon { width: 16px; height: 16px; }
+
+    .title { display: flex; flex-direction: column; gap: 2px; margin-bottom: 10px; }
+    .title .main { font-size: 1.06rem; font-weight: 600; letter-spacing: -0.015em; }
+    .title .sub { font-size: 0.9rem; color: var(--muted-strong); }
+
+    .lines { display: grid; gap: 4px; }
+    .line { display: flex; gap: 12px; align-items: baseline; }
+    .line .nw { white-space: nowrap; }
+    .line .k {
+      flex: none;
+      min-width: 84px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted-strong);
+    }
+    .line a {
+      color: var(--ink);
+      font-weight: 500;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      text-decoration-color: rgba(0, 0, 0, 0.35);
+      overflow-wrap: anywhere;
+    }
+    .line a:hover { text-decoration-color: var(--ink); }
+    .contact { display: flex; flex-wrap: wrap; gap: 4px 16px; }
+
+    .tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 1px 9px;
+      border-radius: 999px;
+      border: 1px solid #ff453a;
+      background: #fff;
+      color: var(--danger);
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+    .tag.past { border-color: #98989d; color: #515154; }
+    .tag.edit { border-color: var(--accent); color: var(--d-transporte); }
+
+    td.price { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em; }
+
+    .row-sel {
+      width: 100%;
+      min-width: 140px;
+      height: 38px;
+      padding: 0 34px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background-color: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      background-position: right 12px center;
+    }
+    .row-sel:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.2); }
+
+    .acts { display: flex; gap: 2px; }
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      background: transparent;
+      color: var(--muted-strong);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .icon-btn:hover { background: #fff; color: var(--accent); }
+    .icon-btn.danger:hover { color: #d70015; }
+    .icon-btn:focus-visible { outline: 2px solid var(--accent); }
+    .icon-btn .icon { width: 18px; height: 18px; }
+
+    tfoot td { padding: 22px 24px; background: var(--deep); color: #fff; font-weight: 700; }
+    tfoot td:first-child {
+      border-radius: 18px 0 0 18px;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #e5e5ea;
+    }
+    tfoot td:last-child { border-radius: 0 18px 18px 0; }
+    tfoot td.num { font-size: 1.6rem; letter-spacing: -0.03em; }
+
+    .empty { margin: 0; padding: 40px 16px 28px; text-align: center; color: var(--muted); }
+    .empty strong { display: block; margin-bottom: 4px; font-size: 1.1rem; color: var(--ink); }
+
+    /* ---------- Desglose ---------- */
+    .people { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+
+    .person {
+      padding: 22px;
+      border-radius: 22px;
+      background: #fbfbfd;
+      border: 1px solid var(--line-soft);
+    }
+    .person-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .person-head .avatar { width: 38px; height: 38px; font-size: 1rem; }
+    .person-head strong { font-size: 1.1rem; letter-spacing: -0.015em; }
+    .person .cap { display: block; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted-strong); }
+    
+    .person .meter { height: 6px; margin: 10px 0 14px; border-radius: 99px; background: rgba(0, 0, 0, 0.08); overflow: hidden; }
+    .person .meter i { display: block; height: 100%; border-radius: 99px; background: var(--av, var(--ink)); }
+
+    .bal {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .bal.pos { background: var(--t-alojamiento); color: var(--d-alojamiento); }
+    .bal.neg { background: #fdecea; color: var(--danger); }
+    .bal.zero { background: #f0f0f3; color: var(--muted-strong); }
+
+    .settle-title { margin: 32px 0 14px; }
+    .settle { list-style: none; display: grid; gap: 10px; margin: 0; padding: 0; }
+    .settle li { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 16px; background: #f5f5f7; font-weight: 500; }
+    .settle li strong { margin-left: auto; font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+    .settle .icon { width: 18px; height: 18px; color: var(--muted-strong); }
+
+    .footnote { padding-bottom: 48px; text-align: center; font-size: 0.82rem; color: var(--muted); }
+
+    /* ---------- Aviso con deshacer ---------- */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 80;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 14px 12px 20px;
+      border-radius: 999px;
+      background: rgba(29, 29, 31, 0.94);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      color: #fff;
+      font-weight: 500;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+      transform: translateX(-50%);
+      animation: toast-in 0.3s ease;
+    }
+    .toast button {
+      padding: 7px 16px;
+      border: 0;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .toast button:focus-visible { outline: 3px solid #6cb4ff; outline-offset: 2px; }
+
+    @keyframes toast-in {
+      from { opacity: 0; transform: translate(-50%, 12px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: none; }
+    }
+    tr.just-added td:not(.day) { animation: pop 0.45s ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+    }
+
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .stat.total { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 640px) {
+      .hero { padding: 48px 0 32px; }
+      
+      .card { padding: 20px; border-radius: 22px; }
+      .panel { padding: 18px; }
+      .seg > span { font-size: 0.86rem; gap: 6px; padding: 0 4px; }
+      .seg .icon { display: none; }
+      .stats { grid-template-columns: 1fr; }
+      .section { margin-bottom: 52px; }
+      .inline-add { max-width: none; }
+
+      .table-card { padding: 8px 12px 16px; }
+    }
+
+    /* ---------- Fechas del viaje ---------- */
+
+    .pill.warn { border-color: #f3b5b0; background: #fff; color: var(--danger); font-weight: 600; }
+
+    /* ---------- Plazos de cancelación ---------- */
+
+    /* ---------- Llegada, vuelta y salida en su día, y días sin planes ---------- */
+    tr.row.marker td:not(.day) { background: color-mix(in srgb, var(--t) 38%, #fff); }
+    tr.row.marker:hover td:not(.day) { background: color-mix(in srgb, var(--t) 62%, #fff); }
+    tr.row.marker .title { margin-bottom: 6px; }
+    tr.row.marker .title .main { font-size: 1rem; }
+    .mk-note { margin: 4px 0 0; font-size: 0.84rem; color: var(--muted-strong); }
+
+    tr.gap td {
+      padding: 10px 16px;
+      border: 1.5px dashed var(--line);
+      border-radius: 14px;
+      color: var(--muted-strong);
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    tr.gap td b { color: var(--ink); font-weight: 600; }
+
+    tr.day-head { display: none; }
+
+
+    /* ---------- Diálogo de reparto ---------- */
+    dialog {
+      width: min(440px, calc(100vw - 32px));
+      padding: 28px;
+      border: 0;
+      border-radius: 26px;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+    }
+    dialog::backdrop { background: rgba(0, 0, 0, 0.32); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    dialog h3 { margin: 0 0 6px; font-size: 1.35rem; letter-spacing: -0.025em; }
+
+    .pick-list { list-style: none; display: grid; gap: 8px; max-height: 46vh; margin: 18px 0 0; padding: 0; overflow: auto; }
+    .pick {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border: 1px solid var(--line-soft);
+      border-radius: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .pick:has(input:checked) { background: var(--t-transporte); border-color: var(--b-transporte); }
+    .pick:has(input:focus-visible) { outline: 3px solid rgba(0, 113, 227, 0.5); outline-offset: 2px; }
+    .pick input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+    .dlg-actions { display: flex; align-items: center; justify-content: flex-end; gap: 18px; margin-top: 22px; }
+    .btn.sm { height: 42px; padding: 0 24px; }
+
+    /* ---------- Vista móvil: cada gasto es una tarjeta ---------- */
+    @media (max-width: 760px) {
+      .table-card { padding: 4px 12px 16px; overflow: visible; }
+      table { display: block; min-width: 0; }
+      thead { display: none; }
+      tbody, tfoot { display: block; }
+      tr.spacer { display: none; }
+
+      tr.day-head { display: block; margin: 16px 0 8px; }
+      tr.day-head td {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        padding: 12px 18px;
+        border-radius: 16px;
+        background: var(--deep);
+        color: #fff;
+      }
+      .dh-wd { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: #e5e5ea; }
+      .dh-dn { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.03em; }
+      .dh-mo { font-size: 0.9rem; font-weight: 600; text-transform: uppercase; color: #f2f2f7; }
+      .dh-sub { margin-left: auto; font-size: 0.92rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+      tr.row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas: "tipo act" "det det" "price pay" "rep rep";
+        gap: 12px;
+        margin-bottom: 10px;
+        padding: 14px 16px;
+        border-radius: 20px;
+        background: var(--t);
+      }
+      tr.row.marker { grid-template-areas: "tipo act" "det det"; background: color-mix(in srgb, var(--t) 38%, #fff); }
+
+      tr.row td,
+      tr.row:hover td:not(.day),
+      tr.row.marker td,
+      tr.row.editing td:not(.day) {
+        display: block;
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: none;
+      }
+      tr.row td.day { display: none; }
+
+      tr.row .c-tipo { grid-area: tipo; }
+      tr.row .c-act { grid-area: act; justify-self: end; position: static; }
+      tr.row .c-det { grid-area: det; }
+      tr.row .c-price { grid-area: price; align-self: center; text-align: left; }
+      tr.row .c-pay { grid-area: pay; align-self: center; justify-self: end; text-align: right; color: var(--muted-strong); }
+      tr.row .c-pay::before { content: "Pagado por "; color: var(--muted); }
+      tr.row .c-rep { grid-area: rep; }
+      tr.row .row-sel { min-width: 0; height: 44px; }
+
+      tr.gap { display: block; margin-bottom: 10px; }
+      tr.gap td { display: block; }
+
+      tfoot tr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 6px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        background: var(--deep);
+      }
+      tfoot td, tfoot td:first-child, tfoot td:last-child { display: block; padding: 0; border-radius: 0; background: none; }
+      tfoot td:last-child { display: none; }
+    }
+
+    @media (max-width: 640px) {
+
+      dialog { padding: 22px; }
+    }
+
+    /* ---------- Interfaz compacta ---------- */
+    html { scroll-padding-top: 64px; }
+
+    .hero { padding: 20px 0 8px; }
+    .hero::after { height: 60px; }
+    .hero-row { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 28px; }
+    .eyebrow { margin-bottom: 0; font-size: 0.85rem; }
+    .dest-row { font-size: clamp(2rem, 5vw, 3rem); }
+    .flag img { height: clamp(24px, 3.4vw, 34px); border-radius: 7px; }
+
+    .pills { margin-top: 0; justify-content: flex-end; gap: 6px; }
+    .pill { padding: 4px 12px; font-size: 0.82rem; }
+
+    .stats { gap: 10px; margin-bottom: 14px; }
+    .stat { gap: 2px; padding: 14px 16px; border-radius: 18px; }
+    .stat-head { margin-bottom: 2px; }
+    .stat .chip-i { width: 26px; height: 26px; border-radius: 8px; }
+    .stat .chip-i .icon { width: 15px; height: 15px; }
+    .stat strong { font-size: 1.3rem; }
+    .stat.total strong { font-size: 1.9rem; }
+    .stat-label { font-size: 0.82rem; }
+    .stat-sub { font-size: 0.78rem; }
+    .bar { height: 4px; margin-top: 4px; }
+
+    .crew {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 14px;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .crew-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .crew .trav-list { margin: 0; gap: 6px; }
+    .trav { gap: 8px; padding: 3px 6px 3px 4px; font-size: 0.9rem; }
+    .trav .avatar { width: 24px; height: 24px; font-size: 0.72rem; }
+    .crew .inline-add { margin-left: auto; max-width: none; gap: 8px; }
+    .crew .inline-add input { flex: none; width: 170px; height: 34px; padding: 0 14px; border-radius: 999px; font-size: 0.9rem; }
+    .btn-tint.sm { height: 34px; padding: 0 14px; font-size: 0.88rem; }
+    .crew .msg { flex-basis: 100%; margin: 0; }
+
+    #details > .grid ~ .grid { margin-top: 16px; }
+    .payer-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; margin-top: -4px; }
+    .payer-cap { font-size: 0.78rem; font-weight: 600; color: var(--muted); }
+    .payer-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .payer-chips button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 12px 3px 4px;
+      border: 1px solid var(--line-soft);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .payer-chips button:hover { border-color: var(--line); background: #f5f5f7; }
+    .payer-chips button.on { border-color: var(--accent); background: rgba(0, 113, 227, 0.1); color: var(--d-transporte); }
+    .payer-chips button:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.5); outline-offset: 2px; }
+    .payer-chips .avatar { width: 24px; height: 24px; font-size: 0.72rem; }
+
+    @media (max-width: 540px) {
+      .payer-row { order: 1; margin-top: -6px; }
+      .field:has(#p-reparto) { order: 2; }
+    }
+
+    .empty .btn { margin-top: 18px; }
+    .empty span { display: block; max-width: 36ch; margin: 0 auto; }
+    .section.is-empty #open-add-2 { display: none; }
+    .table-card.is-empty { padding: 8px; }
+    .table-card.is-empty table { display: none; }
+    .table-card.is-empty .empty { padding: 48px 16px; }
+    
+    .autosize { max-width: calc(100vw - 120px); }
+    .autosize input { width: 0; min-width: 100%; }
+    .hero-main { flex: 0 1 auto; min-width: 0; }
+
+    .section { margin-bottom: 28px; }
+    .section-head { margin-bottom: 12px; }
+    .section-head.row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .section-head h2 { margin-bottom: 2px; font-size: 1.5rem; }
+    .section-head p { font-size: 0.92rem; }
+    .card { padding: 20px; border-radius: 22px; }
+    .card.table-card { padding: 6px 16px 16px; }
+    .footnote { padding-bottom: 20px; }
+
+    .people { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+    .person { padding: 16px; }
+    .person-head { margin-bottom: 10px; }
+    
+    .person .meter { margin: 6px 0 10px; }
+    .settle-title { margin: 20px 0 10px; }
+    .settle li { padding: 10px 14px; }
+
+    /* ---------- Panel del formulario ---------- */
+    dialog.sheet {
+      width: min(860px, calc(100vw - 32px));
+      max-height: calc(100dvh - 32px);
+      padding: 0;
+      border-radius: 26px;
+      overflow: hidden;
+    }
+    dialog.sheet[open] { display: flex; flex-direction: column; }
+    .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px 14px 24px; border-bottom: 1px solid var(--line-soft); }
+    .sheet-head h2 { margin: 0; font-size: 1.25rem; letter-spacing: -0.025em; }
+    #expense-form { flex: 1; min-height: 0; padding: 20px 24px 0; overflow-y: auto; }
+    #details { margin-top: 20px; }
+    #expense-form > fieldset { padding-bottom: 20px; }
+    #details:not([hidden]) { padding-bottom: 0; }
+    .sheet .panel { margin-bottom: 20px; padding: 16px; border-radius: 18px; }
+    .sheet .panel-head { margin-bottom: 14px; }
+    .sheet .grid { gap: 14px 12px; }
+    .sheet .field input, .sheet .field select { height: 42px; font-size: 0.95rem; }
+    .sheet .seg > span { height: 40px; }
+    .sheet .hint { margin-top: 10px; }
+    .sheet .edit-banner { margin-bottom: 16px; padding: 10px 16px; }
+
+    /* ---------- Barra inferior: total y gasto por viajero ---------- */
+
+    .toast { bottom: 92px; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 14px 0 6px; }
+
+      .pills { justify-content: flex-start; }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .stat { padding: 10px 12px; border-radius: 16px; }
+      .stat.total { grid-column: 1 / -1; }
+      .stat:not(.total) .chip-i, .stat:not(.total) .stat-sub { display: none; }
+      .stat:not(.total) strong { font-size: 1.05rem; }
+      .crew .inline-add { width: 100%; margin-left: 0; }
+      .crew .inline-add input { flex: 1; width: auto; }
+      .section-head.row { align-items: flex-start; }
+      .section-head.row .btn-tint { flex: none; }
+      .section-head.row p { display: none; }
+      .card { padding: 16px; }
+      dialog.sheet { width: 100%; max-width: 100%; max-height: 94dvh; margin: auto 0 0; border-radius: 24px 24px 0 0; }
+      .sheet-head { padding: 12px 12px 12px 18px; }
+      #expense-form { padding: 16px 16px 0; }
+
+      .toast { bottom: 84px; }
+    }
+
+    /* =====================================================
+       Capa de diseño: materiales, campos y movimiento tipo Apple
+       ===================================================== */
+    :root { --ease: cubic-bezier(0.22, 1, 0.36, 1); --ring: rgba(0, 122, 255, 0.3); }
+
+    ::selection { background: rgba(0, 122, 255, 0.25); }
+    a, button, summary, select, input { -webkit-tap-highlight-color: transparent; }
+    button { touch-action: manipulation; }
+
+    /* Superficies: borde de medio píxel y sombras suaves */
+    .card,
+.stat,
+.crew,
+.person {
+      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.04);
+    }
+
+    /* Botones con respuesta táctil */
+    .btn,
+.btn-tint,
+.nav-btn,
+.icon-btn,
+.payer-chips button,
+.trav button {
+      transition: background-color 0.2s var(--ease), transform 0.2s var(--ease), opacity 0.2s, box-shadow 0.2s;
+    }
+    .btn:active,
+.btn-tint:active,
+.payer-chips button:active { transform: scale(0.96); }
+    
+    .icon-btn:active { transform: scale(0.9); }
+
+    /* ---------- Hoja modal (estilo iOS) ---------- */
+    dialog.sheet {
+      width: min(700px, calc(100vw - 32px));
+      max-width: none;
+      max-height: calc(100dvh - 48px);
+      margin: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 28px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      background: var(--surface);
+      color: var(--ink);
+      box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.14), 0 32px 90px rgba(0, 0, 0, 0.35);
+    }
+    dialog.sheet:not([open]) { display: none; }
+    dialog.sheet[open] { display: block; animation: sheet-in 0.45s var(--ease); }
+    dialog.sheet[open]::backdrop { background: rgba(0, 0, 0, 0.3); -webkit-backdrop-filter: blur(14px) saturate(120%); backdrop-filter: blur(14px) saturate(120%); animation: fade-in 0.3s ease; }
+    dialog#pick-dialog[open] { animation: sheet-in 0.4s var(--ease); }
+    dialog#pick-dialog::backdrop { background: rgba(0, 0, 0, 0.3); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    @keyframes sheet-in { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: none; } }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+    .sheet-head {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-bottom: 0.5px solid var(--line-soft);
+      background: color-mix(in srgb, var(--surface) 80%, transparent);
+      -webkit-backdrop-filter: saturate(180%) blur(24px);
+      backdrop-filter: saturate(180%) blur(24px);
+    }
+    .sheet-head h2 { margin: 0; font-size: 1.02rem; font-weight: 600; letter-spacing: -0.015em; text-align: center; }
+    .nav-btn { justify-self: start; padding: 9px 12px; border: 0; border-radius: 12px; background: none; color: var(--accent); font: inherit; font-size: 1.02rem; cursor: pointer; }
+    .nav-btn.strong { justify-self: end; font-weight: 600; }
+    .nav-btn:hover:not(:disabled) { background: rgba(0, 122, 255, 0.1); }
+    .nav-btn:active:not(:disabled) { opacity: 0.55; }
+    .nav-btn:disabled { color: var(--muted); opacity: 0.55; cursor: default; }
+    .nav-btn:focus-visible { outline: 3px solid var(--ring); outline-offset: 1px; }
+
+    #expense-form { display: block; flex: none; min-height: 0; padding: 20px 22px 32px; overflow: visible; }
+    .sheet .edit-banner { display: none; }
+    .sheet .panel-head { display: none; }
+    .sheet .panel { margin: 0 0 8px; padding: 0; border: 0; background: transparent; }
+    #details { margin-top: 0; }
+    .sheet .group-title { margin: 22px 2px 10px; font-size: 0.75rem; letter-spacing: 0.06em; color: var(--muted); }
+    .sheet .grid { gap: 14px 12px; }
+    .sheet .hint { margin: 12px 4px 0; font-size: 0.9rem; }
+
+    .sheet .segmented { padding: 3px; border-radius: 13px; background: var(--fill); gap: 2px; }
+    .sheet .seg > span { height: 38px; border-radius: 10px; font-size: 0.95rem; }
+    .sheet .seg input:checked + span { background: var(--surface); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06); }
+
+    .lbl { font-size: 0.8rem; color: var(--muted-strong); font-weight: 500; }
+    .field input, .field select, .inline-add input, .row-sel {
+      border: 0;
+      background-color: var(--fill);
+      color: var(--ink);
+      border-radius: 12px;
+      box-shadow: none;
+    }
+    .sheet .field input, .sheet .field select { height: 44px; }
+    .field input:hover, .field select:hover, .inline-add input:hover { background-color: var(--fill-hover); border-color: transparent; }
+    .field input:focus, .field select:focus, .inline-add input:focus {
+      background-color: var(--surface);
+      box-shadow: 0 0 0 1.5px var(--accent), 0 0 0 5px var(--ring);
+    }
+    .field input:disabled, .field select:disabled { background-color: var(--fill); opacity: 0.55; }
+    .field input::placeholder, .inline-add input::placeholder { color: var(--muted); opacity: 0.8; }
+    .row-sel { border: 0; height: 36px; font-size: 0.9rem; }
+    .row-sel:hover { background-color: var(--fill-hover); }
+    .switch .track { background: rgba(120, 120, 128, 0.32); }
+    .payer-chips button { background: var(--fill); border-color: transparent; }
+    .payer-chips button:hover { background: var(--fill-hover); }
+    .payer-chips button.on { background: rgba(0, 122, 255, 0.14); box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+    /* Selector de viajeros */
+    .pick { background: var(--fill); }
+    .pick:has(input:checked) { background: rgba(0, 122, 255, 0.12); }
+    dialog:not(.sheet) { background: var(--surface); color: var(--ink); border-radius: 26px; box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.14), 0 32px 90px rgba(0, 0, 0, 0.35); }
+
+    /* ---------- Barra inferior: cristal ---------- */
+    
+
+    .toast { background: color-mix(in srgb, var(--deep) 92%, transparent); }
+
+    /* Aparición suave de filas */
+    @media (prefers-reduced-motion: no-preference) {
+      tr.row,
+.stat,
+.crew { animation: rise 0.5s var(--ease) both; }
+      @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+    }
+
+    @media (max-width: 640px) {
+      dialog.sheet { width: 100%; max-height: calc(100dvh - 10px); margin: auto 0 0; border-radius: 26px 26px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+      dialog.sheet[open] { animation: sheet-up 0.5s var(--ease); }
+      @keyframes sheet-up { from { transform: translateY(100%); } to { transform: none; } }
+      .sheet-head { padding-top: 16px; }
+      .sheet-head::before { content: ""; position: absolute; top: 6px; left: 50%; width: 36px; height: 5px; border-radius: 3px; background: rgba(120, 120, 128, 0.35); transform: translateX(-50%); }
+      #expense-form { padding: 16px 16px 28px; }
+      
+    }
+
+    /* ---------- Modo oscuro ---------- */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --deep: #2c2c2e;
+        --fill: #2c2c2e;
+        --fill-hover: #3a3a3c;
+        --ring: rgba(10, 132, 255, 0.4);
+        --bg: #000;
+        --surface: #1c1c1e;
+        --ink: #f5f5f7;
+        --muted: #98989d;
+        --muted-strong: #c7c7cc;
+        --line: #3a3a3c;
+        --line-soft: #2c2c2e;
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --link: #64a8ff;
+        --danger: #ff6961;
+        --c-transporte: #0a84ff; --d-transporte: #6cb4ff; --t-transporte: rgba(10, 132, 255, 0.16); --b-transporte: rgba(10, 132, 255, 0.34);
+        --c-alojamiento: #30d158; --d-alojamiento: #6ee08a; --t-alojamiento: rgba(48, 209, 88, 0.14); --b-alojamiento: rgba(48, 209, 88, 0.32);
+        --c-excursion: #ff9f0a; --d-excursion: #ffbe5c; --t-excursion: rgba(255, 159, 10, 0.15); --b-excursion: rgba(255, 159, 10, 0.34);
+      }
+      .card,
+.stat,
+.crew,
+.person { box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.08); }
+      
+      .hero::before { opacity: 0.4; }
+      .hero::after { background: linear-gradient(rgba(0, 0, 0, 0), var(--bg)); }
+      .pill,
+.pill.warn { background: rgba(44, 44, 46, 0.8); border-color: rgba(255, 255, 255, 0.1); }
+      .pill.warn { border-color: rgba(255, 105, 97, 0.5); }
+      .trav { background: var(--fill); }
+      .trav button:hover { background: #48484a; }
+      .stat.total { background: linear-gradient(160deg, #2c2c2e, #1c1c1e); box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.12); }
+      .panel,
+.person,
+.settle li { background: var(--fill); }
+      
+      .seg input:checked + span, .sheet .seg input:checked + span { background: #636366; color: #fff; }
+      .tag { background: transparent; }
+      .tag.past { color: #c7c7cc; }
+      .icon-btn:hover { background: #3a3a3c; }
+      tr.row.marker td:not(.day) { background: color-mix(in srgb, var(--t) 60%, var(--surface)); }
+      tr.row.marker:hover td:not(.day) { background: color-mix(in srgb, var(--t) 90%, var(--surface)); }
+      .row-sel { color: var(--ink); }
+      
+      .toast { background: rgba(58, 58, 60, 0.95); }
+      .toast button { background: var(--accent); color: #fff; }
+      dialog.sheet, dialog:not(.sheet) { box-shadow: 0 0 0 0.5px rgba(255, 255, 255, 0.14), 0 32px 90px rgba(0, 0, 0, 0.7); }
+      dialog.sheet[open]::backdrop, dialog#pick-dialog::backdrop { background: rgba(0, 0, 0, 0.55); }
+      .field select, .row-sel { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23c7c7cc' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+      .line a { text-decoration-color: rgba(255, 255, 255, 0.4); }
+    }
+
+    /* =====================================================
+       Minimalismo y cristal: fondo suave, superficies translúcidas, color solo donde informa
+       ===================================================== */
+    :root {
+      --glass: rgba(255, 255, 255, 0.55);
+      --glass-strong: rgba(255, 255, 255, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.7);
+      --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 10px 40px rgba(30, 40, 80, 0.07);
+      --hair: rgba(60, 60, 67, 0.12);
+    }
+
+    body {
+      background:
+        radial-gradient(55% 40% at 8% -4%, hsl(var(--h) 90% 90% / 0.95), transparent 70%),
+        radial-gradient(45% 38% at 96% 2%, hsl(calc(var(--h) + 60) 85% 91% / 0.9), transparent 70%),
+        radial-gradient(60% 45% at 78% 100%, hsl(calc(var(--h) - 40) 80% 92% / 0.9), transparent 70%),
+        var(--bg);
+      background-attachment: fixed;
+    }
+    .hero::before, .hero::after { display: none; }
+
+    .card,
+.stat,
+.crew,
+.person,
+.table-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      -webkit-backdrop-filter: blur(28px) saturate(170%);
+      backdrop-filter: blur(28px) saturate(170%);
+      box-shadow: var(--glass-shadow);
+    }
+    .person { border-radius: 20px; }
+
+    /* Tipografía más ligera */
+    .dest-row { font-weight: 600; letter-spacing: -0.04em; }
+    .section-head h2 { font-weight: 600; }
+    .stat strong,
+td.price { font-weight: 600; }
+    .stat.total strong { font-size: 2rem; }
+    .eyebrow { font-weight: 500; letter-spacing: 0; color: var(--muted); }
+
+    /* Resumen: el total se distingue por un matiz, no por un bloque negro */
+    .stat.total { background: color-mix(in srgb, var(--accent) 9%, var(--glass)); color: var(--ink); }
+    .stat.total .stat-label, .stat.total .stat-sub { color: var(--muted); }
+    .chip-i { background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--c); }
+    .bar { background: var(--hair); height: 3px; }
+
+    /* Itinerario: filas de cristal teñidas por tipo */
+    .table-card { padding: 6px 18px 18px; }
+    thead th { font-weight: 500; letter-spacing: 0.08em; color: var(--muted); }
+    thead th.sticky-act { background: transparent; }
+    tr.row td { background: color-mix(in srgb, var(--c) 8%, transparent); border-bottom: 1px solid color-mix(in srgb, var(--c) 14%, transparent); }
+    tr.row td.sticky-act { background: color-mix(in srgb, var(--c) 8%, var(--glass-strong)); }
+    tr.row:hover td:not(.day) { background: color-mix(in srgb, var(--c) 13%, transparent); }
+    tr.row:hover td.sticky-act { background: color-mix(in srgb, var(--c) 13%, var(--glass-strong)); }
+    tr.row.editing td:not(.day) { background: color-mix(in srgb, var(--c) 18%, transparent); }
+    tr.row.last td { border-bottom-color: transparent; }
+    tr.row.marker td:not(.day) { background: color-mix(in srgb, var(--c) 4%, transparent); }
+    tr.row.marker:hover td:not(.day) { background: color-mix(in srgb, var(--c) 9%, transparent); }
+    tr.row td.day { background: color-mix(in srgb, var(--ink) 5%, transparent); color: var(--ink); border-radius: 18px 0 0 18px; }
+    td.day .wd { color: var(--muted); font-weight: 500; }
+    td.day .dn { color: var(--ink); font-weight: 600; font-size: 2.3rem; }
+    td.day .mo { color: var(--muted-strong); font-weight: 500; }
+    td.day .sub { color: var(--muted-strong); font-weight: 500; border-top-color: var(--hair); }
+    .badge { font-weight: 600; }
+    .line .k { font-weight: 500; color: var(--muted); }
+    tfoot td { background: color-mix(in srgb, var(--accent) 9%, transparent); color: var(--ink); font-weight: 600; }
+    tfoot td.num { font-weight: 600; }
+    tfoot td:first-child { border-radius: 18px 0 0 18px; }
+    tr.gap td { border-color: var(--hair); color: var(--muted); background: transparent; }
+
+    /* Selector de medio de transporte */
+    .medio-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .medio-chips button {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 38px;
+      padding: 0 14px 0 11px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--fill);
+      color: var(--muted-strong);
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s var(--ease), color 0.2s, transform 0.2s var(--ease), box-shadow 0.2s;
+    }
+    .medio-chips button .icon { width: 18px; height: 18px; stroke-width: 1.7; }
+    .medio-chips button:hover { background: var(--fill-hover); color: var(--ink); }
+    .medio-chips button:active { transform: scale(0.95); }
+    .medio-chips button.on { background: rgba(0, 122, 255, 0.14); color: var(--d-transporte); box-shadow: inset 0 0 0 1.5px var(--accent); }
+    .medio-chips button:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; }
+
+    /* ---------- Desglose ---------- */
+    #split.card { padding: 22px; }
+    .split-sum { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; }
+    .split-sum .ss { display: flex; flex-direction: column; gap: 2px; padding: 16px 18px; border-radius: 18px; background: color-mix(in srgb, var(--ink) 4%, transparent); }
+    .split-sum .ss.main { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+    .split-sum .cap, .person .cap { font-size: 0.74rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+    .split-sum strong { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+    .split-sum .main strong { font-size: 2rem; }
+    #split .group-title { margin: 26px 2px 12px; font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); }
+    #split .settle-title { margin-top: 28px; }
+
+    .people { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+    .person { display: flex; flex-direction: column; gap: 12px; padding: 18px; background: var(--glass-strong); }
+    .person-head { display: flex; align-items: center; gap: 12px; margin: 0; }
+    .person-head .who { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+    .person-head .who strong { font-size: 1.05rem; font-weight: 600; }
+    .person-head .pct { font-size: 0.82rem; color: var(--muted); }
+    .person-head .cost { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.2; }
+    .person-head .cost b { font-size: 1.55rem; font-weight: 600; letter-spacing: -0.035em; font-variant-numeric: tabular-nums; }
+    .person-head .cost span { font-size: 0.76rem; color: var(--muted); }
+    .person .meter { height: 4px; margin: 0; background: var(--hair); }
+    .by-type { display: flex; flex-wrap: wrap; gap: 6px; }
+    .by-type:empty { display: none; }
+    .bt { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border-radius: 999px; background: color-mix(in srgb, var(--c) 11%, transparent); color: var(--d); font-size: 0.8rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .bt .icon { width: 14px; height: 14px; color: var(--c); }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; font-size: 0.88rem; color: var(--muted-strong); }
+    .bal { margin: 0; padding: 4px 12px; font-weight: 600; font-size: 0.82rem; }
+    .bal.pos { background: color-mix(in srgb, var(--c-alojamiento) 14%, transparent); color: var(--d-alojamiento); }
+    .bal.neg { background: color-mix(in srgb, #ff3b30 12%, transparent); color: var(--danger); }
+    .bal.zero { background: var(--hair); color: var(--muted-strong); }
+
+    .more { border-top: 1px solid var(--hair); padding-top: 4px; }
+    .more summary { display: flex; align-items: center; gap: 8px; padding: 8px 0; list-style: none; font-size: 0.86rem; font-weight: 500; color: var(--link); cursor: pointer; }
+    .more summary::-webkit-details-marker { display: none; }
+    .more summary::after { content: ""; width: 6px; height: 6px; border-right: 1.8px solid currentColor; border-bottom: 1.8px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform 0.2s var(--ease); }
+    .more[open] summary::after { transform: rotate(-135deg); }
+    .more summary:focus-visible { outline: 3px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+    .mine { list-style: none; margin: 0; padding: 0; }
+    .mine li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--hair); }
+    .mine li:first-child { border-top: 0; }
+    .mi-name { display: flex; flex-direction: column; min-width: 0; line-height: 1.3; }
+    .mi-name b { font-size: 0.92rem; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mi-name small { font-size: 0.78rem; color: var(--muted); }
+    .mi-amt { font-size: 0.92rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .owes { list-style: none; display: grid; gap: 8px; margin: 0; padding: 0; }
+    .owes li { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 18px; border-radius: 16px; background: color-mix(in srgb, var(--ink) 4%, transparent); }
+    .owe-text { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; color: var(--muted-strong); }
+    .owe-text b { color: var(--ink); font-weight: 600; }
+    .owe-text .avatar { width: 26px; height: 26px; font-size: 0.74rem; }
+    .owes strong { font-size: 1.15rem; font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+
+    /* Barra inferior y paneles: cristal */
+    
+    dialog.sheet, dialog:not(.sheet) { background: color-mix(in srgb, var(--surface) 86%, transparent); -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); }
+
+    tfoot td, tfoot td:first-child { color: var(--ink); }
+    tfoot td:first-child { color: var(--muted-strong); font-weight: 500; }
+    @media (min-width: 1180px) {
+      th.sticky-act, td.sticky-act { position: static; }
+      tr.row td.sticky-act, tr.row:hover td.sticky-act { background: inherit; }
+    }
+
+    @media (max-width: 760px) {
+      tr.day-head td { background: var(--glass-strong); color: var(--ink); border: 1px solid var(--glass-border); }
+      .dh-wd { color: var(--muted); font-weight: 500; }
+      .dh-dn { font-weight: 600; }
+      .dh-mo { color: var(--muted-strong); font-weight: 500; }
+      .dh-sub { color: var(--ink); }
+      tr.row { background: color-mix(in srgb, var(--c) 8%, var(--glass)); border: 1px solid color-mix(in srgb, var(--c) 16%, transparent); }
+      tr.row.marker { background: color-mix(in srgb, var(--c) 4%, var(--glass)); }
+      tfoot tr { background: color-mix(in srgb, var(--accent) 9%, var(--glass-strong)); color: var(--ink); }
+      .split-sum { grid-template-columns: 1fr 1fr; }
+      .split-sum .ss.main { grid-column: 1 / -1; }
+      .people { grid-template-columns: 1fr; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --glass: rgba(44, 44, 46, 0.5);
+        --glass-strong: rgba(58, 58, 60, 0.6);
+        --glass-border: rgba(255, 255, 255, 0.09);
+        --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 10px 40px rgba(0, 0, 0, 0.35);
+        --hair: rgba(255, 255, 255, 0.12);
+      }
+      body {
+        background:
+          radial-gradient(55% 40% at 8% -4%, hsl(var(--h) 70% 24% / 0.7), transparent 70%),
+          radial-gradient(45% 38% at 96% 2%, hsl(calc(var(--h) + 60) 60% 22% / 0.6), transparent 70%),
+          radial-gradient(60% 45% at 78% 100%, hsl(calc(var(--h) - 40) 60% 20% / 0.6), transparent 70%),
+          #000;
+        background-attachment: fixed;
+      }
+      .card,
+.stat,
+.crew,
+.person,
+.table-card { box-shadow: var(--glass-shadow); }
+      .stat.total { background: color-mix(in srgb, var(--accent) 16%, var(--glass)); }
+      tr.row td { background: color-mix(in srgb, var(--c) 12%, transparent); border-bottom-color: color-mix(in srgb, var(--c) 20%, transparent); }
+      tr.row td.sticky-act { background: color-mix(in srgb, var(--c) 12%, #1c1c1e); }
+      tr.row:hover td:not(.day) { background: color-mix(in srgb, var(--c) 18%, transparent); }
+      tr.row:hover td.sticky-act { background: color-mix(in srgb, var(--c) 18%, #1c1c1e); }
+      tr.row.marker td:not(.day) { background: color-mix(in srgb, var(--c) 6%, transparent); }
+      tr.row td.day { background: rgba(255, 255, 255, 0.06); }
+      .medio-chips button.on { background: rgba(10, 132, 255, 0.22); }
+      .person { background: var(--glass-strong); }
+      .bt { color: var(--ink); }
+      .split-sum .ss, .owes li { background: rgba(255, 255, 255, 0.06); }
+      .bal.pos { color: #6ee08a; }
+      .bal.neg { color: #ff8a82; }
+    }
+
+    /* Con la tabla completa a la vista, la columna de acciones no necesita fondo propio */
+    @media (min-width: 1180px) {
+      tr.row td.sticky-act { background: color-mix(in srgb, var(--c) 8%, transparent); }
+      tr.row:hover td.sticky-act { background: color-mix(in srgb, var(--c) 13%, transparent); }
+      tr.row.marker td.sticky-act { background: color-mix(in srgb, var(--c) 4%, transparent); }
+    }
+    @media (min-width: 1180px) and (prefers-color-scheme: dark) {
+      tr.row td.sticky-act { background: color-mix(in srgb, var(--c) 12%, transparent); }
+      tr.row:hover td.sticky-act { background: color-mix(in srgb, var(--c) 18%, transparent); }
+      tr.row.marker td.sticky-act { background: color-mix(in srgb, var(--c) 6%, transparent); }
+    }
+
+    /* ---------- Cabecera: fechas del viaje ---------- */
+    
+    .hero-row { display: block; }
+    .trip-card {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 18px;
+      padding: 6px;
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      background: var(--glass);
+      -webkit-backdrop-filter: saturate(180%) blur(20px);
+      backdrop-filter: saturate(180%) blur(20px);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+    .trip-cell {
+      position: relative;
+      display: grid;
+      gap: 1px;
+      min-width: 150px;
+      padding: 10px 18px;
+      border-radius: 16px;
+      transition: background 0.2s var(--ease);
+      cursor: pointer;
+    }
+    .trip-cell:hover { background: var(--fill); }
+    .trip-cell:focus-within { background: var(--fill); box-shadow: 0 0 0 3px var(--ring); }
+    .tc-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .tc-date { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; color: var(--ink); text-transform: capitalize; }
+    .trip-cell.empty .tc-date { color: var(--accent); font-weight: 600; font-size: 1.25rem; padding: 3px 0; }
+    .tc-sub { font-size: 0.78rem; color: var(--muted); }
+    .trip-cell input[type=date] {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      opacity: 0; cursor: pointer; border: 0; padding: 0; font-size: 16px;
+    }
+    .trip-mid { display: flex; align-items: center; gap: 6px; width: 64px; color: var(--muted); }
+    .trip-mid i { flex: 1; height: 1px; background: currentColor; opacity: 0.35; }
+    .trip-mid .icon { width: 16px; height: 16px; }
+    .tc-clear {
+      align-self: flex-start; margin: 2px 2px 0 0;
+      width: 24px; height: 24px; border: 0; border-radius: 50%;
+      background: var(--fill); color: var(--muted-strong);
+      font-size: 1.1rem; line-height: 1; cursor: pointer;
+    }
+    .tc-clear:hover { color: var(--ink); }
+    #hero-meta { margin-top: 12px; gap: 14px; justify-content: flex-start; }
+    #hero-meta .pill { padding: 0; border: 0; border-radius: 0; background: none; -webkit-backdrop-filter: none; backdrop-filter: none; font-size: 0.88rem; color: var(--muted-strong); }
+    #hero-meta .pill + .pill::before { content: "·"; margin-right: 14px; color: var(--muted); }
+    #hero-meta .pill.warn { color: var(--danger); background: none; border: 0; }
+    @media (max-width: 540px) {
+      .trip-card { display: flex; width: 100%; }
+      .trip-cell { flex: 1; min-width: 0; padding: 10px 12px; }
+      .tc-date { font-size: 1.35rem; }
+      .trip-mid { width: 36px; }
+      .trip-mid i { display: none; }
+      .tc-clear { position: absolute; top: -8px; right: -6px; align-self: auto; margin: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+    }
+
+    /* Móvil: el tinte va en la tarjeta, no en cada celda */
+    @media (max-width: 760px) {
+      tr.row td, tr.row td.sticky-act, tr.row:hover td.sticky-act { background: transparent !important; }
+    }
+
+    /* ---------- Formularios: iOS y controles de fecha/hora ---------- */
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    a, label, summary, [role="button"], input, select { touch-action: manipulation; }
+
+    /* Safari en iPhone amplía la página al enfocar un campo con menos de 16 px */
+    @media (pointer: coarse), (max-width: 760px) {
+      input:not([type="checkbox"]):not([type="radio"]), select, textarea { font-size: 16px !important; }
+    }
+
+    /* Fecha y hora: mismo recuadro, texto a la izquierda y centrado en vertical en todos los motores */
+    .field input[type="date"],
+    .field input[type="time"] {
+      -webkit-appearance: none;
+      appearance: none;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      padding-block: 0;
+      text-align: left;
+      line-height: 1.2;
+    }
+    .field input[type="date"]::-webkit-date-and-time-value,
+    .field input[type="time"]::-webkit-date-and-time-value { margin: 0; min-height: 1.2em; text-align: left; }
+    .field input[type="date"]::-webkit-datetime-edit,
+    .field input[type="time"]::-webkit-datetime-edit,
+    .field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+    .field input[type="time"]::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+    .field input[type="date"]::-webkit-calendar-picker-indicator,
+    .field input[type="time"]::-webkit-calendar-picker-indicator { margin: 0 0 0 6px; padding: 0; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-transporte" viewBox="0 0 24 24">
+      <rect x="4" y="4" width="16" height="13" rx="2"/>
+      <path d="M4 11h16M8 17v3M16 17v3"/>
+      <path d="M8 14h.01M16 14h.01"/>
+    </symbol>
+    <symbol id="i-alojamiento" viewBox="0 0 24 24">
+      <path d="M3 19V6M3 15h18v4M21 15v-2.5A3.5 3.5 0 0 0 17.5 9H11v6"/>
+      <circle cx="7" cy="11.5" r="1.6"/>
+    </symbol>
+    <symbol id="i-excursion" viewBox="0 0 24 24">
+      <path d="M3 19l6-10 4 6 2.5-3.5L21 19z"/>
+      <circle cx="17" cy="6" r="1.6"/>
+    </symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24">
+      <path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>
+    </symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24">
+      <path d="M4 20h4L19 9l-4-4L4 16z"/>
+      <path d="M13.5 6.5l4 4"/>
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14"/>
+    </symbol>
+    <symbol id="i-x" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6L6 18"/>
+    </symbol>
+    <symbol id="i-m-avion" viewBox="0 0 24 24">
+      <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+    </symbol>
+    <symbol id="i-m-tren" viewBox="0 0 24 24">
+      <path d="M8 3.1V7a4 4 0 0 0 8 0V3.1M9 15l-1-1M15 15l1-1"/>
+      <path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5zM8 19l-2 3M16 19l2 3"/>
+    </symbol>
+    <symbol id="i-m-barco" viewBox="0 0 24 24">
+      <path d="M2 21c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1 .6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/>
+      <path d="M19.4 20A11.6 11.6 0 0 0 21 14l-9-4-9 4c0 2.9.9 5.3 2.8 7.8M19 13V7a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v6M12 10v4M12 2v3"/>
+    </symbol>
+    <symbol id="i-m-bus" viewBox="0 0 24 24">
+      <path d="M8 6v6M15 6v6M2 12h19.6"/>
+      <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3M9 18h5"/>
+      <circle cx="7" cy="18" r="2"/><circle cx="16" cy="18" r="2"/>
+    </symbol>
+    <symbol id="i-m-coche" viewBox="0 0 24 24">
+      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2M9 17h6"/>
+      <circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/>
+    </symbol>
+    <symbol id="i-m-otro" viewBox="0 0 24 24">
+      <path d="M4 17c4 0 4-10 8-10s4 10 8 10"/>
+      <circle cx="4" cy="17" r="1.2"/><circle cx="20" cy="17" r="1.2"/>
+    </symbol>
+  </svg>
+
+  <header class="hero">
+    <div class="wrap">
+      <h1 class="sr-only">Gastos del viaje</h1>
+      <div class="hero-row">
+        <div class="hero-main">
+          <label for="destino" class="eyebrow">¿A dónde viajas?</label>
+          <div class="dest-row">
+            <div class="autosize" id="autosize" data-value="">
+              <input type="text" id="destino" placeholder="Tu destino" maxlength="60" autocomplete="off" spellcheck="false">
+            </div>
+            <span class="flag" id="flag" hidden>
+              <img alt="" hidden>
+              <span class="flag-emoji" hidden></span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="trip-card" role="group" aria-label="Fechas del viaje">
+        <div class="trip-cell">
+          <span class="tc-label">Ida</span>
+          <strong class="tc-date" id="tc-start-d">Elegir</strong>
+          <span class="tc-sub" id="tc-start-s">&nbsp;</span>
+          <input type="date" id="trip-start" aria-label="Fecha de ida del viaje">
+        </div>
+        <div class="trip-mid" aria-hidden="true"><i></i><svg class="icon"><use href="#i-m-avion"/></svg><i></i></div>
+        <div class="trip-cell">
+          <span class="tc-label">Vuelta</span>
+          <strong class="tc-date" id="tc-end-d">Elegir</strong>
+          <span class="tc-sub" id="tc-end-s">&nbsp;</span>
+          <input type="date" id="trip-end" aria-label="Fecha de vuelta del viaje">
+        </div>
+        <button type="button" class="tc-clear" id="trip-clear" aria-label="Quitar fechas del viaje" title="Quitar fechas" hidden>&times;</button>
+      </div>
+      <div class="pills" id="hero-meta"></div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="stats" aria-label="Resumen">
+      <div class="stat total">
+        <span class="stat-label">Total del viaje</span>
+        <strong id="stat-total">0,00 €</strong>
+        <span class="stat-sub" id="stat-count">0 gastos</span>
+      </div>
+      <div class="stat transporte">
+        <div class="stat-head"><span class="chip-i"><svg class="icon"><use href="#i-transporte"/></svg></span><span class="stat-label">Transporte</span></div>
+        <strong id="sum-transporte">0,00 €</strong>
+        <div class="bar"><i id="bar-transporte"></i></div>
+        <span class="stat-sub" id="pct-transporte">0 %</span>
+      </div>
+      <div class="stat alojamiento">
+        <div class="stat-head"><span class="chip-i"><svg class="icon"><use href="#i-alojamiento"/></svg></span><span class="stat-label">Alojamiento</span></div>
+        <strong id="sum-alojamiento">0,00 €</strong>
+        <div class="bar"><i id="bar-alojamiento"></i></div>
+        <span class="stat-sub" id="pct-alojamiento">0 %</span>
+      </div>
+      <div class="stat excursion">
+        <div class="stat-head"><span class="chip-i"><svg class="icon"><use href="#i-excursion"/></svg></span><span class="stat-label">Excursiones</span></div>
+        <strong id="sum-excursion">0,00 €</strong>
+        <div class="bar"><i id="bar-excursion"></i></div>
+        <span class="stat-sub" id="pct-excursion">0 %</span>
+      </div>
+    </section>
+
+    <section class="crew" id="viajeros" aria-label="Viajeros">
+      <span class="crew-label">Viajeros</span>
+      <ul class="trav-list" id="traveler-list" aria-label="Viajeros"></ul>
+      <form id="traveler-form" class="inline-add" autocomplete="off">
+        <label class="sr-only" for="traveler-name">Nombre del viajero</label>
+        <input type="text" id="traveler-name" placeholder="Añadir viajero" maxlength="40" required>
+        <button type="submit" class="btn-tint sm" aria-label="Añadir viajero"><svg class="icon"><use href="#i-plus"/></svg>Añadir</button>
+      </form>
+      <p class="msg" id="traveler-msg" role="status"></p>
+    </section>
+
+    <section class="section" id="itinerario">
+      <div class="section-head row">
+        <div>
+          <h2>Itinerario</h2>
+          <p>Tus gastos agrupados por día, con las llegadas, vueltas y salidas en su fecha.</p>
+        </div>
+        <button type="button" class="btn-tint" id="open-add-2"><svg class="icon"><use href="#i-plus"/></svg>Añadir gasto</button>
+      </div>
+
+      <div class="card table-card">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Detalle</th>
+              <th class="num">Precio</th>
+              <th>Pagado por</th>
+              <th>Reparto</th>
+              <th class="sticky-act"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="expense-body"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3">Total del viaje</td>
+              <td class="num" id="total">0,00 €</td>
+              <td colspan="3"></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div id="empty" class="empty">
+          <strong>Todavía no hay gastos</strong>
+          <span>Empieza por un billete, un alojamiento o una excursión.</span>
+          <button type="button" class="btn" id="open-add-3"><svg class="icon"><use href="#i-plus"/></svg>Añadir el primer gasto</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="desglose">
+      <div class="section-head">
+        <h2>Desglose</h2>
+        <p>Cuánto cuesta el viaje a cada persona y quién debe a quién para dejarlo todo cuadrado.</p>
+      </div>
+      <div class="card" id="split"></div>
+    </section>
+
+    <p class="footnote">Los datos se guardan únicamente en este navegador.</p>
+  </main>
+
+  <dialog id="expense-dialog" class="sheet" aria-labelledby="sheet-title">
+    <div class="sheet-head">
+      <button type="button" class="nav-btn" id="sheet-close">Cancelar</button>
+      <h2 id="sheet-title">Nuevo gasto</h2>
+      <button type="submit" form="expense-form" class="nav-btn strong" id="submit-btn" disabled><span id="submit-label">Añadir</span></button>
+    </div>
+      <form id="expense-form" autocomplete="off">
+        <div class="edit-banner" id="edit-banner" hidden>
+          <span id="edit-label">Editando gasto</span>
+          <button type="button" class="btn-link" id="edit-cancel">Cancelar edición</button>
+        </div>
+
+        <fieldset>
+          <legend class="sr-only">Tipo de gasto</legend>
+          <div class="segmented" role="radiogroup" aria-label="Tipo de gasto">
+            <label class="seg transporte">
+              <input type="radio" name="tipo" value="transporte" required>
+              <span><svg class="icon"><use href="#i-transporte"/></svg>Transporte</span>
+            </label>
+            <label class="seg alojamiento">
+              <input type="radio" name="tipo" value="alojamiento" required>
+              <span><svg class="icon"><use href="#i-alojamiento"/></svg>Alojamiento</span>
+            </label>
+            <label class="seg excursion">
+              <input type="radio" name="tipo" value="excursion" required>
+              <span><svg class="icon"><use href="#i-excursion"/></svg>Excursión</span>
+            </label>
+          </div>
+          <p class="hint" id="hint">Elige un tipo de gasto para continuar.</p>
+        </fieldset>
+
+        <div id="details" hidden>
+          <p class="group-title">Detalles</p>
+
+          <!-- TRANSPORTE -->
+          <div class="panel transporte" data-types="transporte" hidden>
+            <div class="panel-head">
+              <span class="chip-i"><svg class="icon"><use href="#i-transporte"/></svg></span>
+              <div><strong>Transporte</strong><small>Origen, destino y fechas del trayecto</small></div>
+            </div>
+            <div class="grid">
+              <div class="field s12">
+                <span class="lbl"><b>Medio de transporte</b><em>opcional</em></span>
+                <input type="hidden" id="t-medio">
+                <div class="medio-chips" id="medio-chips" role="group" aria-label="Medio de transporte"></div>
+              </div>
+              <label class="field s6"><span class="lbl"><b>Origen</b></span><input type="text" id="t-origen" placeholder="Ciudad o aeropuerto" data-req></label>
+              <label class="field s6"><span class="lbl"><b>Destino</b></span><input type="text" id="t-destino" placeholder="Ciudad o aeropuerto" data-req></label>
+
+              <label class="field s3"><span class="lbl"><b>Fecha de ida</b></span><input type="date" id="t-ida-fecha" data-req></label>
+              <label class="field s3"><span class="lbl"><b>Hora de ida</b><em>opcional</em></span><input type="time" id="t-ida-hora"></label>
+              <label class="field s3"><span class="lbl"><b>Hora de llegada</b><em>opcional</em></span><input type="time" id="t-llegada-hora"></label>
+              <div class="field s3">
+                <span class="lbl"><b>Llega otro día</b></span>
+                <label class="switch">
+                  <input type="checkbox" id="t-otro-dia" role="switch">
+                  <span class="track"></span>
+                  <span class="txt" id="t-otro-dia-txt">No, el mismo día</span>
+                </label>
+              </div>
+
+              <label class="field s3" data-types="transporte" data-when="otroDia" hidden>
+                <span class="lbl"><b>Fecha de llegada</b></span><input type="date" id="t-llegada-fecha" data-req>
+              </label>
+              <p class="note s9 arrival-note" id="t-llegada-note" data-types="transporte" data-when="otroDia" hidden></p>
+
+              <label class="field s6"><span class="lbl"><b>Compañía</b><em>opcional</em></span><input type="text" id="t-compania" placeholder="Iberia, Renfe…"></label>
+              <label class="field s6"><span class="lbl"><b>Nº de ticket</b><em>opcional</em></span><input type="text" id="t-ticket" placeholder="Código del billete"></label>
+
+              <div class="s12" data-types="transporte" data-unless="vuelta">
+                <button type="button" class="btn-tint" id="t-add-vuelta"><svg class="icon"><use href="#i-plus"/></svg>Añadir vuelta</button>
+              </div>
+
+              <div class="s12 subhead" data-types="transporte" data-when="vuelta" hidden>
+                <span>Vuelta</span>
+                <button type="button" class="btn-link danger" id="t-del-vuelta">Quitar vuelta</button>
+              </div>
+              <label class="field s3" data-types="transporte" data-when="vuelta" hidden>
+                <span class="lbl"><b>Fecha de vuelta</b></span><input type="date" id="t-vuelta-fecha" data-req>
+              </label>
+              <label class="field s3" data-types="transporte" data-when="vuelta" hidden>
+                <span class="lbl"><b>Hora de vuelta</b><em>opcional</em></span><input type="time" id="t-vuelta-hora">
+              </label>
+            </div>
+          </div>
+
+          <!-- ALOJAMIENTO -->
+          <div class="panel alojamiento" data-types="alojamiento" hidden>
+            <div class="panel-head">
+              <span class="chip-i"><svg class="icon"><use href="#i-alojamiento"/></svg></span>
+              <div><strong>Alojamiento</strong><small>Reserva, contacto y fechas de estancia</small></div>
+            </div>
+            <div class="grid">
+              <label class="field s6"><span class="lbl"><b>Nombre</b></span><input type="text" id="a-nombre" placeholder="Hotel, apartamento…" data-req></label>
+              <label class="field s6"><span class="lbl"><b>Ciudad</b></span><input type="text" id="a-ciudad" placeholder="Ciudad" data-req></label>
+
+              <label class="field s12"><span class="lbl"><b>Dirección</b><em>opcional</em></span><input type="text" id="a-direccion" placeholder="Calle, número, código postal"></label>
+
+              <label class="field s4"><span class="lbl"><b>Fecha de entrada</b></span><input type="date" id="a-entrada" data-req></label>
+              <label class="field s4"><span class="lbl"><b>Fecha de salida</b></span><input type="date" id="a-salida" data-req></label>
+              <label class="field s4"><span class="lbl"><b>Nº de reserva</b><em>opcional</em></span><input type="text" id="a-reserva" placeholder="Código de reserva"></label>
+
+              <label class="field s4"><span class="lbl"><b>Web</b><em>opcional</em></span><input type="text" id="a-web" inputmode="url" placeholder="www.ejemplo.com"></label>
+              <label class="field s4"><span class="lbl"><b>Teléfono</b><em>opcional</em></span><input type="tel" id="a-telefono" placeholder="+34 600 000 000"></label>
+              <label class="field s4"><span class="lbl"><b>Email</b><em>opcional</em></span><input type="email" id="a-email" placeholder="reservas@ejemplo.com"></label>
+            </div>
+          </div>
+
+          <!-- EXCURSIÓN -->
+          <div class="panel excursion" data-types="excursion" hidden>
+            <div class="panel-head">
+              <span class="chip-i"><svg class="icon"><use href="#i-excursion"/></svg></span>
+              <div><strong>Excursión</strong><small>Actividad, recogida y contacto</small></div>
+            </div>
+            <div class="grid">
+              <label class="field s6"><span class="lbl"><b>Nombre</b></span><input type="text" id="e-nombre" placeholder="Nombre de la actividad" data-req></label>
+              <label class="field s6"><span class="lbl"><b>Lugar de recogida</b><em>opcional</em></span><input type="text" id="e-recogida" placeholder="Punto de encuentro"></label>
+
+              <label class="field s12"><span class="lbl"><b>Dirección</b><em>opcional</em></span><input type="text" id="e-direccion" placeholder="Dirección de la actividad"></label>
+
+              <label class="field s3"><span class="lbl"><b>Fecha</b></span><input type="date" id="e-fecha" data-req></label>
+              <label class="field s3"><span class="lbl"><b>Hora</b><em>opcional</em></span><input type="time" id="e-hora"></label>
+              <label class="field s6"><span class="lbl"><b>Web</b><em>opcional</em></span><input type="text" id="e-web" inputmode="url" placeholder="www.ejemplo.com"></label>
+
+              <label class="field s6"><span class="lbl"><b>Teléfono</b><em>opcional</em></span><input type="tel" id="e-telefono" placeholder="+34 600 000 000"></label>
+              <label class="field s6"><span class="lbl"><b>Email</b><em>opcional</em></span><input type="email" id="e-email" placeholder="info@ejemplo.com"></label>
+            </div>
+          </div>
+
+          <p class="group-title">Pago</p>
+          <div class="grid">
+            <label class="field s4"><span class="lbl"><b>Importe</b></span>
+              <span class="money"><input type="number" id="precio" min="0" step="0.01" inputmode="decimal" placeholder="0,00" required></span>
+            </label>
+            <label class="field s4"><span class="lbl"><b>Pagado por</b></span>
+              <input type="text" id="pagado" list="payers" placeholder="Nombre" required>
+            </label>
+            <label class="field s4"><span class="lbl"><b>Reparto</b></span>
+              <select id="p-reparto"></select>
+            </label>
+            <div class="s12 payer-row" id="payer-row" hidden>
+              <span class="payer-cap">Quién paga</span>
+              <div class="payer-chips" id="payer-chips" role="group" aria-label="Elegir quién paga"></div>
+            </div>
+          </div>
+          <datalist id="payers"></datalist>
+
+          <div class="grid" data-types="alojamiento excursion" hidden>
+            <label class="field s6"><span class="lbl"><b>Fecha del cargo</b><em>opcional</em></span><input type="date" id="p-cargo"></label>
+            <label class="field s6"><span class="lbl"><b>Cancelación gratuita hasta</b><em>opcional</em></span><input type="date" id="p-cancelacion"></label>
+          </div>
+
+        </div>
+      </form>
+
+  </dialog>
+
+  <dialog id="pick-dialog" aria-labelledby="pick-title">
+    <h3 id="pick-title">¿Entre quién se reparte?</h3>
+    <p class="note">Marca a quienes participan en este gasto.</p>
+    <ul class="pick-list" id="pick-list"></ul>
+    <p class="msg err" id="pick-msg" role="alert"></p>
+    <div class="dlg-actions">
+      <button type="button" class="btn-link" id="pick-cancel">Cancelar</button>
+      <button type="button" class="btn sm" id="pick-apply">Aplicar</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden>
+    <span id="toast-text"></span>
+    <button type="button" id="toast-undo">Deshacer</button>
+  </div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "gastos-viaje";
+      const DEST_KEY = "gastos-viaje-destino";
+      const TRAV_KEY = "gastos-viaje-viajeros";
+      const TRIP_KEY = "gastos-viaje-fechas";
+      const SVG_NS = "http://www.w3.org/2000/svg";
+
+      const LABELS = {
+        transporte: "Transporte",
+        alojamiento: "Alojamiento",
+        excursion: "Excursión",
+      };
+
+      // Orden dentro de un mismo día: primero cómo llegas, luego dónde duermes, luego lo que haces
+      // (la salida de un alojamiento va antes que todo: dejas el hotel y luego viajas)
+      const RANK = { transporte: 1, alojamiento: 2, excursion: 3 };
+      const RANK_CHECKOUT = 0;
+
+      const HINTS = {
+        "": "Elige un tipo de gasto para continuar.",
+        transporte: "Billete con origen, destino y fecha de ida. La llegada y la vuelta son opcionales.",
+        alojamiento: "Reserva con ciudad, fechas, contacto y política de cancelación.",
+        excursion: "Actividad con fecha, hora, lugar de recogida y contacto.",
+      };
+
+      // Campo del objeto "detalle" -> id del input del formulario
+      const FIELDS = {
+        transporte: {
+          medio: "t-medio", origen: "t-origen", destino: "t-destino",
+          idaFecha: "t-ida-fecha", idaHora: "t-ida-hora",
+          llegadaFecha: "t-llegada-fecha", llegadaHora: "t-llegada-hora",
+          vueltaFecha: "t-vuelta-fecha", vueltaHora: "t-vuelta-hora",
+          compania: "t-compania", ticket: "t-ticket",
+        },
+        alojamiento: {
+          nombre: "a-nombre", ciudad: "a-ciudad", direccion: "a-direccion",
+          entrada: "a-entrada", salida: "a-salida", reserva: "a-reserva",
+          web: "a-web", telefono: "a-telefono", email: "a-email",
+          cargo: "p-cargo", cancelacion: "p-cancelacion",
+        },
+        excursion: {
+          nombre: "e-nombre", recogida: "e-recogida", direccion: "e-direccion",
+          fecha: "e-fecha", hora: "e-hora",
+          web: "e-web", telefono: "e-telefono", email: "e-email",
+          cargo: "p-cargo", cancelacion: "p-cancelacion",
+        },
+      };
+
+      // Fechas que se rellenan solas mientras el usuario no las toca
+      const TOUCHABLE = new Set(["t-llegada-fecha", "t-vuelta-fecha", "a-salida"]);
+
+      /* ---------- Países (código ISO | nombre | alias…) ---------- */
+      const COUNTRY_DATA = `
+AD|Andorra
+AE|Emiratos Árabes Unidos|Emiratos Árabes|Emiratos|United Arab Emirates
+AF|Afganistán|Afghanistan
+AG|Antigua y Barbuda
+AL|Albania
+AM|Armenia
+AO|Angola
+AR|Argentina
+AT|Austria
+AU|Australia
+AZ|Azerbaiyán|Azerbaijan
+BA|Bosnia y Herzegovina|Bosnia
+BB|Barbados
+BD|Bangladés|Bangladesh
+BE|Bélgica|Belgium
+BF|Burkina Faso
+BG|Bulgaria
+BH|Baréin|Bahréin|Bahrain
+BI|Burundi
+BJ|Benín
+BN|Brunéi|Brunei
+BO|Bolivia
+BR|Brasil|Brazil
+BS|Bahamas
+BT|Bután|Bhutan
+BW|Botsuana|Botswana
+BY|Bielorrusia|Belarus
+BZ|Belice|Belize
+CA|Canadá|Canada
+CD|República Democrática del Congo|RD Congo
+CF|República Centroafricana
+CG|Congo
+CH|Suiza|Switzerland
+CI|Costa de Marfil|Côte d'Ivoire
+CL|Chile
+CM|Camerún|Cameroon
+CN|China
+CO|Colombia
+CR|Costa Rica
+CU|Cuba
+CV|Cabo Verde
+CY|Chipre|Cyprus
+CZ|Chequia|República Checa|Czechia
+DE|Alemania|Germany
+DJ|Yibuti
+DK|Dinamarca|Denmark
+DM|Dominica
+DO|República Dominicana
+DZ|Argelia|Algeria
+EC|Ecuador
+EE|Estonia
+EG|Egipto|Egypt
+ER|Eritrea
+ES|España|Spain
+ET|Etiopía|Ethiopia
+FI|Finlandia|Finland
+FJ|Fiyi|Fiji
+FM|Micronesia
+FR|Francia|France
+GA|Gabón
+GB|Reino Unido|Inglaterra|Escocia|Gales|Gran Bretaña|United Kingdom|England|Scotland|UK
+GD|Grenada
+GE|Georgia
+GH|Ghana
+GM|Gambia
+GN|Guinea
+GQ|Guinea Ecuatorial
+GR|Grecia|Greece
+GT|Guatemala
+GW|Guinea-Bisáu|Guinea Bisáu
+GY|Guyana
+HK|Hong Kong
+HN|Honduras
+HR|Croacia|Croatia
+HT|Haití
+HU|Hungría|Hungary
+ID|Indonesia
+IE|Irlanda|Ireland
+IL|Israel
+IN|India
+IQ|Irak|Iraq
+IR|Irán|Iran
+IS|Islandia|Iceland
+IT|Italia|Italy
+JM|Jamaica
+JO|Jordania|Jordan
+JP|Japón|Japan
+KE|Kenia|Kenya
+KG|Kirguistán
+KH|Camboya|Cambodia
+KI|Kiribati
+KM|Comoras
+KN|San Cristóbal y Nieves
+KP|Corea del Norte
+KR|Corea del Sur|Corea|South Korea
+KW|Kuwait
+KZ|Kazajistán|Kazakhstan
+LA|Laos
+LB|Líbano|Lebanon
+LC|Santa Lucía
+LI|Liechtenstein
+LK|Sri Lanka
+LR|Liberia
+LS|Lesoto
+LT|Lituania
+LU|Luxemburgo
+LV|Letonia
+LY|Libia
+MA|Marruecos|Morocco
+MC|Mónaco
+MD|Moldavia
+ME|Montenegro
+MG|Madagascar
+MH|Islas Marshall
+MK|Macedonia del Norte
+ML|Malí
+MM|Myanmar|Birmania
+MN|Mongolia
+MO|Macao
+MR|Mauritania
+MT|Malta
+MU|Mauricio
+MV|Maldivas|Maldives
+MW|Malaui|Malawi
+MX|México|Mexico|Méjico
+MY|Malasia|Malaysia
+MZ|Mozambique
+NA|Namibia
+NE|Níger
+NG|Nigeria
+NI|Nicaragua
+NL|Países Bajos|Holanda|Netherlands
+NO|Noruega|Norway
+NP|Nepal
+NR|Nauru
+NZ|Nueva Zelanda|New Zealand
+OM|Omán
+PA|Panamá
+PE|Perú|Peru
+PG|Papúa Nueva Guinea
+PH|Filipinas|Philippines
+PK|Pakistán
+PL|Polonia|Poland
+PR|Puerto Rico
+PS|Palestina
+PT|Portugal
+PW|Palaos
+PY|Paraguay
+QA|Catar|Qatar
+RO|Rumanía|Rumania|Romania
+RS|Serbia
+RU|Rusia|Russia
+RW|Ruanda
+SA|Arabia Saudí|Arabia Saudita|Saudi Arabia
+SB|Islas Salomón
+SC|Seychelles
+SD|Sudán
+SE|Suecia|Sweden
+SG|Singapur|Singapore
+SI|Eslovenia
+SK|Eslovaquia
+SL|Sierra Leona
+SM|San Marino
+SN|Senegal
+SO|Somalia
+SR|Surinam
+SS|Sudán del Sur
+ST|Santo Tomé y Príncipe
+SV|El Salvador
+SY|Siria
+SZ|Esuatini|Suazilandia
+TD|Chad
+TG|Togo
+TH|Tailandia|Thailand
+TJ|Tayikistán
+TL|Timor Oriental
+TM|Turkmenistán
+TN|Túnez|Tunisia
+TO|Tonga
+TR|Turquía|Turkey|Türkiye
+TT|Trinidad y Tobago
+TV|Tuvalu
+TW|Taiwán|Taiwan
+TZ|Tanzania
+UA|Ucrania|Ukraine
+UG|Uganda
+US|Estados Unidos|EEUU|EE UU|USA|United States
+UY|Uruguay
+UZ|Uzbekistán
+VA|Ciudad del Vaticano|Vaticano
+VC|San Vicente y las Granadinas
+VE|Venezuela
+VN|Vietnam
+VU|Vanuatu
+WS|Samoa
+XK|Kosovo
+YE|Yemen
+ZA|Sudáfrica|South Africa
+ZM|Zambia
+ZW|Zimbabue|Zimbabwe
+`;
+
+      const normalize = (s) =>
+        s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+      // Claves ordenadas de más larga a más corta: "Guinea Ecuatorial" gana a "Guinea"
+      const COUNTRY_KEYS = COUNTRY_DATA.split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .flatMap((l) => {
+          const [code, name, ...aliases] = l.split("|");
+          return [name, ...aliases].map((n) => ({ key: normalize(n), code, name }));
+        })
+        .sort((a, b) => b.key.length - a.key.length);
+
+      function detectCountry(text) {
+        const t = ` ${normalize(text)} `;
+        if (t.trim() === "") return null;
+        return COUNTRY_KEYS.find((c) => t.includes(` ${c.key} `)) || null;
+      }
+
+      const emojiFlag = (code) =>
+        String.fromCodePoint(...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65));
+
+      /* ---------- Referencias ---------- */
+      const $ = (id) => document.getElementById(id);
+      const form = $("expense-form");
+      const details = $("details");
+      const hint = $("hint");
+      const body = $("expense-body");
+      const emptyEl = $("empty");
+      const destInput = $("destino");
+      const autosize = $("autosize");
+      const heroMeta = $("hero-meta");
+      const flagBox = $("flag");
+      const flagImg = flagBox.querySelector("img");
+      const flagEmoji = flagBox.querySelector(".flag-emoji");
+
+      const money = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
+      const eur = (cents) => money.format(cents / 100);
+
+      /* ---------- Estado ---------- */
+      const state = { otroDia: false, vuelta: false };
+      let expenses = readJSON(STORAGE_KEY, []);
+      let travelers = readJSON(TRAV_KEY, []);
+      let trip = readTrip();
+      let editingId = null;
+      let lastAdded = null;
+      let flagCode = "";
+
+      if (!Array.isArray(expenses)) expenses = [];
+      expenses = expenses.filter((e) => e && typeof e === "object");
+      if (!Array.isArray(travelers)) travelers = [];
+      travelers = travelers.filter((t) => typeof t === "string" && t.trim());
+
+      /* ---------- Almacenamiento ---------- */
+      function readJSON(key, fallback) {
+        try {
+          const data = JSON.parse(localStorage.getItem(key));
+          return data === null || data === undefined ? fallback : data;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function writeJSON(key, value) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+        } catch {}
+      }
+
+      function isIso(s) {
+        return typeof s === "string" && /^\d{4}-\d{2}-\d{2}$/.test(s);
+      }
+
+      function readTrip() {
+        const t = readJSON(TRIP_KEY, null);
+        return {
+          inicio: t && isIso(t.inicio) ? t.inicio : "",
+          fin: t && isIso(t.fin) ? t.fin : "",
+        };
+      }
+
+      const save = () => writeJSON(STORAGE_KEY, expenses);
+      const saveTravelers = () => writeJSON(TRAV_KEY, travelers);
+      const saveTrip = () => writeJSON(TRIP_KEY, trip);
+
+      /* ---------- Viajeros ---------- */
+      const nameKey = (s) =>
+        s.normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
+
+      // Devuelve el nombre tal como está en la lista; si no existe, lo añade
+      function canonical(name) {
+        const n = name.trim().replace(/\s+/g, " ");
+        if (!n) return "";
+        const key = nameKey(n);
+        const found = travelers.find((t) => nameKey(t) === key);
+        if (found) return found;
+        travelers.push(n);
+        saveTravelers();
+        return n;
+      }
+
+      // Los gastos guardados antes de existir la lista aportan sus pagadores
+      expenses.forEach((e) => {
+        if (typeof e.pagado === "string" && e.pagado.trim()) e.pagado = canonical(e.pagado);
+      });
+      save();
+
+      // Quiénes aparecen nombrados de forma explícita en el reparto de un gasto
+      function explicitMembers(r) {
+        if (!r) return [];
+        if (r.modo === "uno") return [r.viajero];
+        if (r.modo === "varios" && Array.isArray(r.viajeros)) return r.viajeros;
+        return [];
+      }
+
+      function usageCount(name) {
+        return expenses.filter((e) => e.pagado === name || explicitMembers(e.reparto).includes(name)).length;
+      }
+
+      function setTravelerMsg(text, isError) {
+        const msg = $("traveler-msg");
+        msg.textContent = text || "";
+        msg.classList.toggle("err", !!isError);
+      }
+
+      $("traveler-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const input = $("traveler-name");
+        const name = input.value.trim().replace(/\s+/g, " ");
+        if (!name) return;
+
+        if (travelers.some((t) => nameKey(t) === nameKey(name))) {
+          setTravelerMsg(`${name} ya está en la lista.`, true);
+          return;
+        }
+        travelers.push(name);
+        saveTravelers();
+        input.value = "";
+        setTravelerMsg("");
+        render();
+      });
+
+      function removeTraveler(name) {
+        const n = usageCount(name);
+        if (n > 0) {
+          setTravelerMsg(`${name} aparece en ${plural(n, "gasto", "gastos")}. Cambia esos gastos antes de quitarlo.`, true);
+          return;
+        }
+        travelers = travelers.filter((t) => t !== name);
+        saveTravelers();
+        setTravelerMsg("");
+        render();
+      }
+
+      const MEDIOS = { avion: "Avión", tren: "Tren", barco: "Barco", bus: "Autobús", coche: "Coche", otro: "Otro" };
+
+      function buildMedioChips() {
+        const box = $("medio-chips");
+        Object.entries(MEDIOS).forEach(([key, label]) => {
+          const b = el("button");
+          b.type = "button";
+          b.dataset.medio = key;
+          b.append(icon("m-" + key), document.createTextNode(label));
+          b.addEventListener("click", () => {
+            const input = $("t-medio");
+            input.value = input.value === key ? "" : key;
+            syncMedio();
+          });
+          box.appendChild(b);
+        });
+        syncMedio();
+      }
+
+      function syncMedio() {
+        const v = $("t-medio").value;
+        $("medio-chips").querySelectorAll("button").forEach((b) => {
+          const on = b.dataset.medio === v;
+          b.classList.toggle("on", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+      }
+
+      function renderPayerChips() {
+        const box = $("payer-chips");
+        box.textContent = "";
+        travelers.forEach((name) => {
+          const b = el("button");
+          b.type = "button";
+          b.dataset.name = name;
+          const av = el("span", "avatar", initial(name));
+          av.style.setProperty("--av", avatarColor(name));
+          av.setAttribute("aria-hidden", "true");
+          b.append(av, document.createTextNode(name));
+          b.addEventListener("click", () => {
+            $("pagado").value = name;
+            syncPayerChips();
+            $("pagado").dispatchEvent(new Event("input", { bubbles: true }));
+          });
+          box.appendChild(b);
+        });
+        $("payer-row").hidden = travelers.length === 0;
+        syncPayerChips();
+      }
+
+      function syncPayerChips() {
+        const v = nameKey($("pagado").value);
+        $("payer-chips").querySelectorAll("button").forEach((b) => {
+          const on = v !== "" && nameKey(b.dataset.name) === v;
+          b.classList.toggle("on", on);
+          b.setAttribute("aria-pressed", String(on));
+        });
+      }
+
+      function avatarColor(name) {
+        return `hsl(${hueOf(name)} 52% 36%)`;
+      }
+
+      function initial(name) {
+        return name.trim().charAt(0).toUpperCase();
+      }
+
+      function renderTravelers() {
+        const list = $("traveler-list");
+        list.textContent = "";
+        travelers.forEach((name) => {
+          const li = el("li", "trav");
+          const av = el("span", "avatar", initial(name));
+          av.style.setProperty("--av", avatarColor(name));
+          av.setAttribute("aria-hidden", "true");
+
+          const btn = el("button");
+          btn.type = "button";
+          btn.setAttribute("aria-label", `Quitar a ${name}`);
+          btn.title = "Quitar";
+          btn.appendChild(icon("x"));
+          btn.addEventListener("click", () => removeTraveler(name));
+
+          li.append(av, el("span", "", name), btn);
+          list.appendChild(li);
+        });
+
+        renderPayerChips();
+
+        const payers = $("payers");
+        payers.textContent = "";
+        travelers.forEach((name) => {
+          const option = document.createElement("option");
+          option.value = name;
+          payers.appendChild(option);
+        });
+      }
+
+      /* ---------- Reparto ---------- */
+      // El reparto de un gasto es: todos, uno solo, o un grupo de varios
+      function repartoToValue(r) {
+        if (r && r.modo === "uno") return "uno:" + r.viajero;
+        if (r && r.modo === "varios" && Array.isArray(r.viajeros)) return "varios:" + JSON.stringify(r.viajeros);
+        return "todos";
+      }
+
+      const repartoValue = (e) => repartoToValue(e.reparto);
+
+      function parseReparto(value) {
+        if (value.startsWith("uno:")) return { modo: "uno", viajero: value.slice(4) };
+        if (value.startsWith("varios:")) {
+          try {
+            const names = JSON.parse(value.slice(7));
+            if (Array.isArray(names)) return { modo: "varios", viajeros: names.filter((n) => typeof n === "string") };
+          } catch {}
+        }
+        return { modo: "todos" };
+      }
+
+      // Quiénes participan en un gasto; si el reparto no es válido, todos
+      function participants(r) {
+        if (r && r.modo === "uno" && travelers.includes(r.viajero)) return [r.viajero];
+        if (r && r.modo === "varios" && Array.isArray(r.viajeros)) {
+          const group = travelers.filter((t) => r.viajeros.includes(t));
+          if (group.length) return group;
+        }
+        return travelers.slice();
+      }
+
+      // De una lista de nombres a la forma más simple de reparto
+      function repartoFromNames(names) {
+        const group = travelers.filter((t) => names.includes(t));
+        if (!group.length || group.length === travelers.length) return { modo: "todos" };
+        if (group.length === 1) return { modo: "uno", viajero: group[0] };
+        return { modo: "varios", viajeros: group };
+      }
+
+      function repartoLabel(r) {
+        const group = participants(r);
+        if (group.length === 2) return `${group[0]} y ${group[1]}`;
+        return `${group.length} de ${travelers.length} viajeros`;
+      }
+
+      function fillReparto(select, value) {
+        select.textContent = "";
+        const add = (v, text) => {
+          const o = document.createElement("option");
+          o.value = v;
+          o.textContent = text;
+          select.appendChild(o);
+        };
+
+        const wanted = value || "todos";
+        add("todos", "Entre todos");
+        travelers.forEach((t) => add("uno:" + t, "Solo " + t));
+        if (wanted.startsWith("varios:")) add(wanted, repartoLabel(parseReparto(wanted)));
+        // Con dos viajeros, "todos" y "solo X" ya cubren cualquier grupo
+        if (travelers.length >= 3) add("pick", "Elegir viajeros…");
+
+        select.value = wanted;
+        if (select.value !== wanted) select.value = "todos";
+        select.title = select.value.startsWith("varios:") ? participants(parseReparto(select.value)).join(", ") : "";
+      }
+
+      // Diálogo con casillas para elegir quién participa en un gasto
+      let pickCallbacks = null;
+
+      function openPicker(current, onApply, onCancel) {
+        const selected = new Set(participants(current));
+        const list = $("pick-list");
+        list.textContent = "";
+
+        travelers.forEach((name) => {
+          const li = el("li");
+          const label = el("label", "pick");
+          const box = document.createElement("input");
+          box.type = "checkbox";
+          box.value = name;
+          box.checked = selected.has(name);
+          const av = el("span", "avatar", initial(name));
+          av.style.setProperty("--av", avatarColor(name));
+          av.setAttribute("aria-hidden", "true");
+          label.append(box, av, el("span", "", name));
+          li.appendChild(label);
+          list.appendChild(li);
+        });
+
+        $("pick-msg").textContent = "";
+        pickCallbacks = { onApply, onCancel };
+        $("pick-dialog").showModal();
+      }
+
+      $("pick-apply").addEventListener("click", () => {
+        const names = [...$("pick-list").querySelectorAll("input:checked")].map((i) => i.value);
+        if (!names.length) {
+          $("pick-msg").textContent = "Elige al menos un viajero.";
+          return;
+        }
+        const cb = pickCallbacks;
+        pickCallbacks = null;
+        $("pick-dialog").close();
+        if (cb) cb.onApply(repartoFromNames(names));
+      });
+
+      $("pick-cancel").addEventListener("click", () => $("pick-dialog").close());
+
+      // Clic fuera del cuadro (en el fondo) cierra sin aplicar
+      $("pick-dialog").addEventListener("click", (event) => {
+        if (event.target !== event.currentTarget) return;
+        const r = event.currentTarget.getBoundingClientRect();
+        const inside = event.clientX >= r.left && event.clientX <= r.right && event.clientY >= r.top && event.clientY <= r.bottom;
+        if (!inside) event.currentTarget.close();
+      });
+
+      $("pick-dialog").addEventListener("close", () => {
+        const cb = pickCallbacks;
+        pickCallbacks = null;
+        if (cb && cb.onCancel) cb.onCancel();
+      });
+
+      function setFormReparto(value) {
+        const select = $("p-reparto");
+        fillReparto(select, value);
+        select.dataset.prev = select.value;
+      }
+
+      // Todo en céntimos para que el reparto sume exactamente el total
+      function computeSplit(list) {
+        const share = new Map(travelers.map((t) => [t, 0]));
+        const paid = new Map(travelers.map((t) => [t, 0]));
+        const items = new Map(travelers.map((t) => [t, []]));
+        let total = 0;
+
+        list.forEach((e) => {
+          const cents = Math.round((Number(e.precio) || 0) * 100);
+          total += cents;
+          if (paid.has(e.pagado)) paid.set(e.pagado, paid.get(e.pagado) + cents);
+
+          // Reparto entre los participantes; los céntimos sobrantes rotan según el gasto
+          const group = participants(e.reparto);
+          const n = group.length;
+          if (!n) return;
+          const base = Math.floor(cents / n);
+          const rem = cents - base * n;
+          const start = Math.abs(Number(e.id) || 0) % n;
+          group.forEach((t, i) => {
+            const extra = (i - start + n) % n < rem ? 1 : 0;
+            share.set(t, share.get(t) + base + extra);
+            items.get(t).push({ e, cents: base + extra });
+          });
+        });
+
+        return { share, paid, total, items };
+      }
+
+      // Pocas transferencias: los que más deben pagan a los que más les deben
+      function settle(share, paid) {
+        const creditors = [];
+        const debtors = [];
+        travelers.forEach((t) => {
+          const balance = paid.get(t) - share.get(t);
+          if (balance > 0) creditors.push([t, balance]);
+          else if (balance < 0) debtors.push([t, -balance]);
+        });
+        creditors.sort((a, b) => b[1] - a[1]);
+        debtors.sort((a, b) => b[1] - a[1]);
+
+        const out = [];
+        let i = 0;
+        let j = 0;
+        while (i < debtors.length && j < creditors.length) {
+          const amount = Math.min(debtors[i][1], creditors[j][1]);
+          out.push({ from: debtors[i][0], to: creditors[j][0], cents: amount });
+          debtors[i][1] -= amount;
+          creditors[j][1] -= amount;
+          if (debtors[i][1] === 0) i++;
+          if (creditors[j][1] === 0) j++;
+        }
+        return out;
+      }
+
+      function renderSplit(valid) {
+        const box = $("split");
+        box.textContent = "";
+
+        if (!valid.length || !travelers.length) {
+          const p = el("p", "empty");
+          p.append(el("strong", "", "Sin desglose todavía"), document.createTextNode("Añade viajeros y gastos para ver cuánto cuesta el viaje a cada uno."));
+          box.appendChild(p);
+          return;
+        }
+
+        const { share, paid, total, items } = computeSplit(valid);
+        const n = travelers.length;
+
+        // Resumen general
+        const sum = el("div", "split-sum");
+        const stat = (cap, value, cls) => {
+          const d = el("div", "ss" + (cls ? " " + cls : ""));
+          d.append(el("span", "cap", cap), el("strong", "", value));
+          return d;
+        };
+        sum.append(
+          stat("Total del viaje", eur(total), "main"),
+          stat("Viajeros", String(n)),
+          stat("Media por persona", eur(Math.round(total / n)))
+        );
+        box.appendChild(sum);
+
+        // Lo que cuesta a cada uno
+        box.appendChild(el("p", "group-title", "Lo que le cuesta el viaje a cada uno"));
+        const people = el("div", "people");
+
+        travelers.forEach((name) => {
+          const mine = share.get(name);
+          const advanced = paid.get(name);
+          const balance = advanced - mine;
+          const pct = total > 0 ? (mine / total) * 100 : 0;
+          const mineItems = items.get(name).slice().sort((a, b) => dateOf(a.e).localeCompare(dateOf(b.e)));
+
+          const card = el("article", "person");
+          card.style.setProperty("--av", avatarColor(name));
+
+          const head = el("div", "person-head");
+          const av = el("span", "avatar", initial(name));
+          av.setAttribute("aria-hidden", "true");
+          const who = el("div", "who");
+          who.append(el("strong", "", name), el("span", "pct", `${Math.round(pct)} % del total`));
+          const cost = el("div", "cost");
+          cost.append(el("b", "", eur(mine)), el("span", "", "le cuesta el viaje"));
+          head.append(av, who, cost);
+
+          const meter = el("div", "meter");
+          const fill = document.createElement("i");
+          fill.style.width = pct + "%";
+          meter.appendChild(fill);
+
+          // Por tipo de gasto
+          const types = el("div", "by-type");
+          ["transporte", "alojamiento", "excursion"].forEach((t) => {
+            const cents = mineItems.filter((i) => i.e.tipo === t).reduce((acc, i) => acc + i.cents, 0);
+            if (!cents) return;
+            const chip = el("span", "bt " + t);
+            chip.append(icon(t), document.createTextNode(`${LABELS[t]} ${eur(cents)}`));
+            types.appendChild(chip);
+          });
+
+          // Quién ha pagado qué y cómo queda
+          const flow = el("div", "flow");
+          flow.append(el("span", "", `Ha pagado ${eur(advanced)} de su bolsillo`));
+          const bal = el("span", "bal");
+          if (balance > 0) {
+            bal.classList.add("pos");
+            bal.textContent = `Le devuelven ${eur(balance)}`;
+          } else if (balance < 0) {
+            bal.classList.add("neg");
+            bal.textContent = `Tiene que pagar ${eur(-balance)}`;
+          } else {
+            bal.classList.add("zero");
+            bal.textContent = "Cuentas al día";
+          }
+          flow.appendChild(bal);
+
+          // Detalle gasto a gasto
+          const more = document.createElement("details");
+          more.className = "more";
+          const sm = document.createElement("summary");
+          sm.textContent = `Ver sus ${mineItems.length} ${mineItems.length === 1 ? "gasto" : "gastos"}`;
+          const ul = el("ul", "mine");
+          mineItems.forEach((it) => {
+            const li = el("li");
+            const label = el("span", "mi-name");
+            label.append(el("b", "", describe(it.e)), el("small", "", `${LABELS[it.e.tipo]} · ${shortDate(dateOf(it.e))}${participants(it.e.reparto).length < n ? ` · entre ${participants(it.e.reparto).length}` : ""}`));
+            li.append(label, el("span", "mi-amt", eur(it.cents)));
+            ul.appendChild(li);
+          });
+          more.append(sm, ul);
+
+          card.append(head, meter, types, flow, more);
+          people.appendChild(card);
+        });
+        box.appendChild(people);
+
+        // Quién debe a quién
+        box.appendChild(el("p", "group-title settle-title", "Quién debe a quién"));
+        const transfers = settle(share, paid);
+        if (!transfers.length) {
+          box.appendChild(el("p", "note", n < 2
+            ? "Añade a los demás viajeros para repartir los gastos."
+            : "Todo está cuadrado: nadie debe nada a nadie."));
+        } else {
+          const ul = el("ul", "owes");
+          transfers.forEach((t) => {
+            const li = el("li");
+            const mk = (name) => {
+              const a = el("span", "avatar", initial(name));
+              a.style.setProperty("--av", avatarColor(name));
+              a.setAttribute("aria-hidden", "true");
+              return a;
+            };
+            const text = el("span", "owe-text");
+            text.append(mk(t.from), el("b", "", t.from), document.createTextNode(" paga a "), mk(t.to), el("b", "", t.to));
+            li.append(text, el("strong", "", eur(t.cents)));
+            ul.appendChild(li);
+          });
+          box.appendChild(ul);
+        }
+      }
+
+      /* ---------- Fechas ---------- */
+      function parseDate(iso) {
+        const [y, m, d] = iso.split("-").map(Number);
+        return new Date(y, m - 1, d);
+      }
+
+      function todayDate() {
+        const n = new Date();
+        return new Date(n.getFullYear(), n.getMonth(), n.getDate());
+      }
+
+      function localIso(d) {
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${d.getFullYear()}-${m}-${day}`;
+      }
+
+      function addDays(iso, n) {
+        if (!iso) return "";
+        const d = parseDate(iso);
+        d.setDate(d.getDate() + n);
+        return localIso(d);
+      }
+
+      function dayDiff(from, to) {
+        if (!from || !to) return 0;
+        return Math.round((parseDate(to) - parseDate(from)) / 86400000);
+      }
+
+      function formatDate(iso) {
+        if (!iso) return "";
+        const [y, m, d] = iso.split("-");
+        return `${d}/${m}/${y}`;
+      }
+
+      function shortDate(iso) {
+        return parseDate(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+      }
+
+      function dateTime(date, time) {
+        return [formatDate(date), time].filter(Boolean).join(" · ");
+      }
+
+      const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+
+      // Fecha que coloca el gasto en su día
+      function dateOf(e) {
+        const d = e.detalle || {};
+        if (e.tipo === "transporte") return d.idaFecha;
+        if (e.tipo === "alojamiento") return d.entrada;
+        return d.fecha;
+      }
+
+      function timeOf(e) {
+        const d = e.detalle || {};
+        if (e.tipo === "transporte") return d.idaHora || "";
+        if (e.tipo === "excursion") return d.hora || "";
+        return "";
+      }
+
+      function allDates(e) {
+        const d = e.detalle || {};
+        return ["idaFecha", "llegadaFecha", "vueltaFecha", "entrada", "salida", "fecha"]
+          .map((k) => d[k])
+          .filter(Boolean);
+      }
+
+      function compare(a, b) {
+        return (
+          dateOf(a).localeCompare(dateOf(b)) ||
+          (RANK[a.tipo] - RANK[b.tipo]) ||
+          timeOf(a).localeCompare(timeOf(b)) ||
+          a.id - b.id
+        );
+      }
+
+      /* ---------- Destino y bandera ---------- */
+      function hueOf(text) {
+        let h = 0;
+        for (const ch of text.toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) % 360;
+        return h;
+      }
+
+      function updateFlag(text) {
+        const country = detectCountry(text);
+
+        if (!country) {
+          flagCode = "";
+          flagBox.hidden = true;
+          return;
+        }
+        if (country.code === flagCode) return;
+
+        flagCode = country.code;
+        flagEmoji.textContent = emojiFlag(country.code);
+        flagImg.hidden = true;
+        flagEmoji.hidden = true;
+        flagImg.alt = country.name;
+        flagImg.src = `https://flagcdn.com/${country.code.toLowerCase()}.svg`;
+
+        flagBox.hidden = false;
+        flagBox.classList.remove("pop");
+        void flagBox.offsetWidth;
+        flagBox.classList.add("pop");
+      }
+
+      flagImg.addEventListener("load", () => {
+        flagImg.hidden = false;
+        flagEmoji.hidden = true;
+      });
+      flagImg.addEventListener("error", () => {
+        flagImg.hidden = true;
+        flagEmoji.hidden = false;
+      });
+
+      function applyDestination(name) {
+        const n = name.trim();
+        autosize.dataset.value = destInput.value || destInput.placeholder;
+        document.documentElement.style.setProperty("--h", n ? String(hueOf(n)) : "215");
+        document.title = n ? `Gastos · ${n}` : "Gastos del viaje";
+        updateFlag(n);
+      }
+
+      destInput.addEventListener("input", () => {
+        applyDestination(destInput.value);
+        try {
+          localStorage.setItem(DEST_KEY, destInput.value);
+        } catch {}
+      });
+
+      /* ---------- Fechas del viaje ---------- */
+      // Ventana completa solo si hay inicio y fin válidos
+      function windowRange() {
+        return trip.inicio && trip.fin && trip.inicio <= trip.fin ? { inicio: trip.inicio, fin: trip.fin } : null;
+      }
+
+      function renderTripInputs() {
+        $("trip-start").value = trip.inicio;
+        $("trip-end").value = trip.fin;
+        $("trip-end").min = trip.inicio;
+        $("trip-start").max = trip.fin;
+        $("trip-clear").hidden = !trip.inicio && !trip.fin;
+        [["start", trip.inicio], ["end", trip.fin]].forEach(([k, iso]) => {
+          const d = iso ? parseDate(iso) : null;
+          $("tc-" + k + "-d").textContent = d ? d.toLocaleDateString("es-ES", { day: "numeric", month: "short" }).replace(".", "") : "Elegir";
+          $("tc-" + k + "-s").textContent = d
+            ? d.toLocaleDateString("es-ES", { weekday: "long" }).replace(/^./, (c) => c.toUpperCase()) + " · " + d.getFullYear()
+            : "\u00a0";
+          $("tc-" + k + "-d").parentElement.classList.toggle("empty", !d);
+        });
+      }
+
+      // Abrir el selector al pulsar en cualquier punto de la celda (Chrome solo lo abre desde el icono)
+      ["trip-start", "trip-end"].forEach((id) => {
+        $(id).addEventListener("click", () => { try { $(id).showPicker(); } catch (_) {} });
+      });
+
+      function onTripChange() {
+        trip.inicio = $("trip-start").value;
+        trip.fin = $("trip-end").value;
+        // Si el fin quedó antes del inicio, se arrastra
+        if (trip.inicio && trip.fin && trip.fin < trip.inicio) trip.fin = trip.inicio;
+        saveTrip();
+        renderTripInputs();
+        smartDates();
+        validateRanges();
+        render();
+      }
+
+      $("trip-start").addEventListener("change", onTripChange);
+      $("trip-end").addEventListener("change", onTripChange);
+      $("trip-clear").addEventListener("click", () => {
+        trip = { inicio: "", fin: "" };
+        saveTrip();
+        renderTripInputs();
+        smartDates();
+        validateRanges();
+        render();
+      });
+
+      function updateHero(valid) {
+        heroMeta.textContent = "";
+        const add = (text, cls) => heroMeta.appendChild(el("span", "pill" + (cls ? " " + cls : ""), text));
+
+        const win = windowRange();
+        const dates = valid.flatMap(allDates).sort();
+        if (!win && !dates.length) return;
+
+        const start = win ? win.inicio : dates[0];
+        const end = win ? win.fin : dates[dates.length - 1];
+
+        if (!win) add(`${shortDate(start)} – ${shortDate(end)}`);
+        add(plural(dayDiff(start, end) + 1, "día", "días"));
+
+        const until = dayDiff(localIso(todayDate()), start);
+        if (until > 0) add(`Faltan ${plural(until, "día", "días")}`);
+        else if (until === 0) add("Sales hoy");
+        else if (parseDate(end) >= todayDate()) add("Viaje en curso");
+
+        if (win) {
+          const outside = valid.filter((e) => allDates(e).some((d) => d < win.inicio || d > win.fin)).length;
+          if (outside) add(`${plural(outside, "gasto", "gastos")} fuera del viaje`, "warn");
+        }
+      }
+
+      /* ---------- Formulario ---------- */
+      function selectedType() {
+        const checked = form.querySelector('input[name="tipo"]:checked');
+        return checked ? checked.value : "";
+      }
+
+      // Muestra y activa solo los bloques que corresponden al tipo y a los interruptores
+      function sync() {
+        const tipo = selectedType();
+
+        form.querySelectorAll("[data-types]").forEach((box) => {
+          const typeOk = box.dataset.types.split(" ").includes(tipo);
+          const whenOk = !box.dataset.when || state[box.dataset.when];
+          const unlessOk = !box.dataset.unless || !state[box.dataset.unless];
+          const active = typeOk && whenOk && unlessOk;
+
+          box.hidden = !active;
+          box.querySelectorAll("input, select").forEach((input) => {
+            input.disabled = !active;
+            input.required = active && input.hasAttribute("data-req");
+          });
+        });
+
+        $("t-otro-dia").checked = state.otroDia;
+        $("t-otro-dia-txt").textContent = state.otroDia ? "Sí, otro día" : "No, el mismo día";
+      }
+
+      function updateForm() {
+        const tipo = selectedType();
+        details.hidden = !tipo;
+        hint.textContent = HINTS[tipo];
+
+        ["precio", "pagado", "p-reparto"].forEach((id) => { $(id).disabled = !tipo; });
+        $("submit-btn").disabled = !tipo;
+        syncMedio();
+
+        sync();
+        smartDates();
+        validateRanges();
+      }
+
+      const val = (id) => $(id).value;
+
+      function arrivalDate() {
+        return state.otroDia && val("t-llegada-fecha") ? val("t-llegada-fecha") : val("t-ida-fecha");
+      }
+
+      // Calendarios con sentido: no se puede llegar antes de salir ni volver antes de llegar,
+      // y las fechas se proponen a partir de la anterior para abrir el mes correcto
+      function smartDates() {
+        const tipo = selectedType();
+        const ida = val("t-ida-fecha");
+        const lle = $("t-llegada-fecha");
+        const vue = $("t-vuelta-fecha");
+        const sal = $("a-salida");
+        const ent = val("a-entrada");
+
+        // Las fechas del viaje acotan los servicios; cada calendario además no baja de la fecha anterior
+        const bound = (input, min) => {
+          input.min = [min, trip.inicio].filter(Boolean).sort().pop() || "";
+          input.max = trip.fin || "";
+        };
+        const capped = (iso) => (trip.fin && iso > trip.fin ? trip.fin : iso);
+
+        bound($("t-ida-fecha"), "");
+        bound($("a-entrada"), "");
+        bound($("e-fecha"), "");
+
+        bound(lle, ida);
+        if (state.otroDia && ida && !lle.dataset.touched) lle.value = capped(addDays(ida, 1));
+
+        const arrival = arrivalDate();
+        bound(vue, arrival);
+        if (state.vuelta && arrival && !vue.dataset.touched) vue.value = arrival;
+
+        bound(sal, ent);
+        if (ent && !sal.dataset.touched) sal.value = capped(addDays(ent, 1));
+
+        const startRef = tipo === "alojamiento" ? ent : val("e-fecha");
+        const endRef = tipo === "alojamiento" ? (sal.value || ent) : val("e-fecha");
+        $("p-cancelacion").max = startRef;
+        $("p-cargo").max = endRef;
+
+        const extra = state.otroDia ? dayDiff(ida, lle.value) : 0;
+        $("t-llegada-note").textContent =
+          extra > 0 ? `Llegas ${plural(extra, "día", "días")} después de salir.` : "";
+      }
+
+      function validateRanges() {
+        const ida = val("t-ida-fecha");
+        const idaH = val("t-ida-hora");
+        const lle = $("t-llegada-fecha");
+        const lleH = $("t-llegada-hora");
+        const vue = $("t-vuelta-fecha");
+        const sal = $("a-salida");
+        const cancel = $("p-cancelacion");
+        const cargo = $("p-cargo");
+        const tipo = selectedType();
+
+        [lle, lleH, vue, sal, cancel, cargo, $("t-ida-fecha"), $("a-entrada"), $("e-fecha")]
+          .forEach((i) => i.setCustomValidity(""));
+
+        if (state.otroDia && lle.value && ida && lle.value < ida) {
+          lle.setCustomValidity("La llegada no puede ser anterior a la salida.");
+        }
+
+        const arrival = arrivalDate();
+        if (arrival && arrival === ida && idaH && lleH.value && lleH.value < idaH) {
+          lleH.setCustomValidity("La hora de llegada no puede ser anterior a la de salida.");
+        }
+
+        if (state.vuelta && vue.value && arrival && vue.value < arrival) {
+          vue.setCustomValidity("La vuelta no puede ser anterior a la llegada.");
+        }
+
+        const ent = val("a-entrada");
+        if (tipo === "alojamiento" && ent && sal.value && sal.value < ent) {
+          sal.setCustomValidity("La salida no puede ser anterior a la entrada.");
+        }
+
+        // Fechas de servicio dentro del viaje
+        if (trip.inicio || trip.fin) {
+          const range = trip.inicio && trip.fin
+            ? `${formatDate(trip.inicio)} – ${formatDate(trip.fin)}`
+            : trip.inicio ? `desde el ${formatDate(trip.inicio)}` : `hasta el ${formatDate(trip.fin)}`;
+          ["t-ida-fecha", "t-llegada-fecha", "t-vuelta-fecha", "a-entrada", "a-salida", "e-fecha"].forEach((id) => {
+            const input = $(id);
+            if (input.disabled || !input.value || input.validity.customError) return;
+            if ((trip.inicio && input.value < trip.inicio) || (trip.fin && input.value > trip.fin)) {
+              input.setCustomValidity(`Fuera de las fechas del viaje (${range}).`);
+            }
+          });
+        }
+
+        const startRef = tipo === "alojamiento" ? ent : val("e-fecha");
+        const endRef = tipo === "alojamiento" ? (sal.value || ent) : val("e-fecha");
+        if (cancel.value && startRef && cancel.value > startRef) {
+          cancel.setCustomValidity("La cancelación gratuita debe terminar antes de la fecha del servicio.");
+        }
+        if (cargo.value && endRef && cargo.value > endRef) {
+          cargo.setCustomValidity("El cargo no puede ser posterior al servicio.");
+        }
+      }
+
+      function resetTouched() {
+        TOUCHABLE.forEach((id) => delete $(id).dataset.touched);
+      }
+
+      form.addEventListener("input", (event) => {
+        if (event.target.id === "pagado") syncPayerChips();
+        if (TOUCHABLE.has(event.target.id)) event.target.dataset.touched = "1";
+        smartDates();
+        validateRanges();
+      });
+
+      form.addEventListener("change", (event) => {
+        const target = event.target;
+
+        if (target.name === "tipo") {
+          updateForm();
+        } else if (target.id === "p-reparto") {
+          if (target.value === "pick") {
+            const prev = target.dataset.prev || "todos";
+            openPicker(
+              parseReparto(prev),
+              (r) => setFormReparto(repartoToValue(r)),
+              () => setFormReparto(prev)
+            );
+          } else {
+            target.dataset.prev = target.value;
+          }
+        } else if (target.id === "t-otro-dia") {
+          state.otroDia = target.checked;
+          delete $("t-llegada-fecha").dataset.touched;
+          sync();
+          smartDates();
+          validateRanges();
+          if (state.otroDia) $("t-llegada-fecha").focus();
+        } else {
+          smartDates();
+          validateRanges();
+        }
+      });
+
+      $("t-add-vuelta").addEventListener("click", () => {
+        state.vuelta = true;
+        delete $("t-vuelta-fecha").dataset.touched;
+        sync();
+        smartDates();
+        validateRanges();
+        $("t-vuelta-fecha").focus();
+      });
+
+      $("t-del-vuelta").addEventListener("click", () => {
+        state.vuelta = false;
+        $("t-vuelta-fecha").value = "";
+        $("t-vuelta-hora").value = "";
+        delete $("t-vuelta-fecha").dataset.touched;
+        sync();
+        validateRanges();
+      });
+
+      function resetFormState() {
+        state.otroDia = false;
+        state.vuelta = false;
+        resetTouched();
+      }
+
+      function setEditing(id, label) {
+        editingId = id;
+        const editing = id !== null;
+
+        $("edit-banner").hidden = !editing;
+        $("edit-label").textContent = label || "";
+        $("submit-label").textContent = editing ? "Guardar" : "Añadir";
+        $("sheet-title").textContent = editing ? "Editar gasto" : "Nuevo gasto";
+      }
+
+      /* ---------- Panel del formulario ---------- */
+      const sheet = $("expense-dialog");
+
+      function openSheet() {
+        if (sheet.open) return;
+        sheet.showModal();
+        // El foco va al primer campo útil, no al botón de cerrar
+        const first = !$("details").hidden && [...$("details").querySelectorAll("input, select")].find((i) => !i.disabled && i.offsetParent !== null);
+        (first || form.querySelector('input[name="tipo"]:checked') || form.querySelector('input[name="tipo"]')).focus();
+      }
+
+      // Un borrador a medias se conserva; solo se descarta una edición abandonada
+      function openNew() {
+        if (editingId !== null) {
+          clearForm();
+          render();
+        }
+        openSheet();
+      }
+
+      $("open-add-2").addEventListener("click", openNew);
+      $("open-add-3").addEventListener("click", openNew);
+      $("sheet-close").addEventListener("click", () => sheet.close());
+
+      // Al cerrar con Esc, la X o «Cancelar», se descarta una edición a medias
+      sheet.addEventListener("close", () => {
+        if (editingId !== null) {
+          clearForm();
+          render();
+        }
+      });
+
+      function describe(e) {
+        const d = e.detalle || {};
+        if (e.tipo === "transporte") return [d.origen, d.destino].filter(Boolean).join(" → ") || "Transporte";
+        return d.nombre || LABELS[e.tipo];
+      }
+
+      function clearForm() {
+        form.reset();
+        resetFormState();
+        setEditing(null);
+        setFormReparto("todos");
+        updateForm();
+        syncPayerChips();
+      }
+
+      function startEdit(e) {
+        form.reset();
+        resetFormState();
+
+        const d = e.detalle || {};
+        const radio = form.querySelector(`input[name="tipo"][value="${e.tipo}"]`);
+        if (!radio) return;
+        radio.checked = true;
+
+        if (e.tipo === "transporte") {
+          state.otroDia = !!(d.llegadaFecha && d.idaFecha && d.llegadaFecha !== d.idaFecha);
+          state.vuelta = !!(d.vueltaFecha || d.vueltaHora);
+        }
+
+        setEditing(e.id, `Editando · ${describe(e)}`);
+        setFormReparto(repartoValue(e));
+        updateForm();
+
+        for (const [key, id] of Object.entries(FIELDS[e.tipo])) {
+          if ($(id)) $(id).value = d[key] || "";
+        }
+        $("precio").value = e.precio;
+        $("pagado").value = e.pagado || "";
+        syncPayerChips();
+        syncMedio();
+
+        // Lo guardado manda: las fechas automáticas no deben pisarlo
+        TOUCHABLE.forEach((id) => { if ($(id).value) $(id).dataset.touched = "1"; });
+        smartDates();
+        validateRanges();
+
+        render();
+        openSheet();
+      }
+
+      function cancelEdit() {
+        clearForm();
+        render();
+      }
+
+      $("edit-cancel").addEventListener("click", () => {
+        cancelEdit();
+        if (sheet.open) sheet.close();
+      });
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        const tipo = selectedType();
+        if (!tipo) return;
+
+        const detalle = {};
+        for (const [key, id] of Object.entries(FIELDS[tipo])) {
+          detalle[key] = $(id).value.trim();
+        }
+
+        if (tipo === "transporte") {
+          if (!state.otroDia) detalle.llegadaFecha = detalle.idaFecha;
+          if (!state.vuelta) {
+            detalle.vueltaFecha = "";
+            detalle.vueltaHora = "";
+          }
+        }
+
+        const expense = {
+          id: editingId !== null ? editingId : Date.now(),
+          tipo,
+          detalle,
+          precio: parseFloat($("precio").value) || 0,
+          pagado: canonical($("pagado").value),
+          reparto: parseReparto($("p-reparto").value),
+        };
+
+        if (editingId !== null) {
+          const index = expenses.findIndex((x) => x.id === editingId);
+          if (index >= 0) expenses[index] = expense;
+          else expenses.push(expense);
+        } else {
+          expenses.push(expense);
+        }
+
+        lastAdded = expense.id;
+        save();
+
+        clearForm();
+        render();
+        if (sheet.open) sheet.close();
+        $("itinerario").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      /* ---------- Borrar con deshacer ---------- */
+      let toastTimer = null;
+      let undoAction = null;
+
+      function hideToast() {
+        clearTimeout(toastTimer);
+        $("toast").hidden = true;
+        undoAction = null;
+      }
+
+      function showToast(text, onUndo) {
+        clearTimeout(toastTimer);
+        $("toast-text").textContent = text;
+        undoAction = onUndo;
+        $("toast").hidden = false;
+        toastTimer = setTimeout(hideToast, 8000);
+      }
+
+      $("toast-undo").addEventListener("click", () => {
+        const action = undoAction;
+        hideToast();
+        if (action) action();
+      });
+
+      function removeExpense(e) {
+        const index = expenses.findIndex((x) => x.id === e.id);
+        if (index < 0) return;
+
+        expenses.splice(index, 1);
+        if (editingId === e.id) clearForm();
+        save();
+        render();
+
+        showToast("Gasto eliminado", () => {
+          expenses.splice(Math.min(index, expenses.length), 0, e);
+          save();
+          render();
+        });
+      }
+
+      /* ---------- Elementos de la tabla ---------- */
+      function icon(name) {
+        const svg = document.createElementNS(SVG_NS, "svg");
+        svg.setAttribute("class", "icon");
+        svg.setAttribute("aria-hidden", "true");
+        const use = document.createElementNS(SVG_NS, "use");
+        use.setAttribute("href", "#i-" + name);
+        svg.appendChild(use);
+        return svg;
+      }
+
+      function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+      }
+
+      function line(key, ...values) {
+        const row = el("div", "line");
+        const v = el("span");
+        if (values.every((x) => typeof x === "string")) v.className = "nw";
+        values.forEach((x) => v.append(x));
+        row.append(el("span", "k", key), v);
+        return row;
+      }
+
+      function titleNode(main, sub) {
+        const t = el("div", "title");
+        t.appendChild(el("span", "main", main));
+        if (sub) t.appendChild(el("span", "sub", sub));
+        return t;
+      }
+
+      function link(href, text, external) {
+        const a = el("a", "", text);
+        a.href = href;
+        if (external) {
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+        }
+        return a;
+      }
+
+      function normalizeUrl(raw) {
+        if (!raw) return null;
+        const value = /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : "https://" + raw;
+        try {
+          const u = new URL(value);
+          return u.protocol === "http:" || u.protocol === "https:" ? u : null;
+        } catch {
+          return null;
+        }
+      }
+
+      function contactLine(d) {
+        const items = [];
+
+        if (d.web) {
+          const u = normalizeUrl(d.web);
+          items.push(u ? link(u.href, u.hostname.replace(/^www\./, ""), true) : el("span", "", d.web));
+        }
+        if (d.telefono) {
+          const digits = d.telefono.replace(/[^\d+]/g, "");
+          items.push(digits ? link("tel:" + digits, d.telefono) : el("span", "", d.telefono));
+        }
+        if (d.email) items.push(link("mailto:" + d.email, d.email));
+
+        if (!items.length) return null;
+
+        const wrap = el("span", "contact");
+        items.forEach((i) => wrap.appendChild(i));
+        const row = el("div", "line");
+        row.append(el("span", "k", "Contacto"), wrap);
+        return row;
+      }
+
+      function cancelLine(iso) {
+        if (!iso) return null;
+        const parts = ["Gratis hasta " + formatDate(iso)];
+
+        const days = dayDiff(localIso(todayDate()), iso);
+        if (days < 0) {
+          parts.push(el("span", "tag past", "Vencida"));
+        } else if (days === 0) {
+          parts.push(el("span", "tag", "Vence hoy"));
+        } else if (days <= 7) {
+          parts.push(el("span", "tag", "Vence en " + plural(days, "día", "días")));
+        }
+        return line("Cancelación", ...parts);
+      }
+
+      function addressLine(address) {
+        if (!address) return null;
+        const a = link("https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(address), address, true);
+        return line("Dirección", a);
+      }
+
+      function detailNodes(e) {
+        const d = e.detalle || {};
+        const nodes = [];
+        const add = (n) => { if (n) nodes.push(n); };
+
+        if (e.tipo === "transporte") {
+          const route = [d.origen, d.destino].filter(Boolean).join("  →  ");
+          const how = [MEDIOS[d.medio], d.compania].filter(Boolean).join(" · ");
+          if (route) add(titleNode(route, how));
+          else if (how) add(titleNode(how));
+
+          add(line("Ida", dateTime(d.idaFecha, d.idaHora)));
+
+          const extra = dayDiff(d.idaFecha, d.llegadaFecha);
+          const suffix = extra > 0 ? `  (+${plural(extra, "día", "días")})` : "";
+          add(line("Llegada", dateTime(d.llegadaFecha || d.idaFecha, d.llegadaHora) + suffix));
+
+          if (d.vueltaFecha) add(line("Vuelta", dateTime(d.vueltaFecha, d.vueltaHora)));
+          if (d.ticket) add(line("Ticket", d.ticket));
+          return nodes;
+        }
+
+        if (e.tipo === "alojamiento") {
+          if (d.nombre) add(titleNode(d.nombre, d.ciudad));
+          else if (d.ciudad) add(titleNode(d.ciudad));
+          add(addressLine(d.direccion));
+
+          const n = dayDiff(d.entrada, d.salida);
+          add(line("Entrada", formatDate(d.entrada)));
+          add(line("Salida", formatDate(d.salida) + (n > 0 ? ` · ${plural(n, "noche", "noches")}` : "")));
+          if (d.reserva) add(line("Reserva", d.reserva));
+        } else {
+          if (d.nombre) add(titleNode(d.nombre));
+          add(line("Hora", d.hora || "Sin hora"));
+          if (d.recogida) add(line("Recogida", d.recogida));
+          add(addressLine(d.direccion));
+        }
+
+        if (d.cargo) add(line("Cargo", formatDate(d.cargo)));
+        add(cancelLine(d.cancelacion));
+        add(contactLine(d));
+        return nodes;
+      }
+
+      function dayCell(dateIso, count, subtotal) {
+        const d = parseDate(dateIso);
+        const td = el("td", "day");
+        td.rowSpan = count;
+        td.append(
+          el("div", "wd", d.toLocaleDateString("es-ES", { weekday: "short" }).replace(".", "")),
+          el("div", "dn", String(d.getDate())),
+          el("div", "mo", d.toLocaleDateString("es-ES", { month: "short" }).replace(".", "") + " " + d.getFullYear())
+        );
+        if (subtotal > 0) td.appendChild(el("div", "sub", money.format(subtotal)));
+        return td;
+      }
+
+      function expenseRow(e, first, last, dayTd) {
+        const tr = el("tr", `row ${e.tipo}`);
+        if (first) tr.classList.add("first");
+        if (last) tr.classList.add("last");
+        if (e.id === lastAdded) tr.classList.add("just-added");
+        if (e.id === editingId) tr.classList.add("editing");
+        tr.dataset.id = e.id;
+
+        if (dayTd) tr.appendChild(dayTd);
+
+        const tdTipo = el("td", "c-tipo");
+        tdTipo.appendChild(typeBadge(e));
+
+        const tdDetalle = el("td", "c-det");
+        const lines = el("div", "lines");
+        detailNodes(e).forEach((n) => lines.appendChild(n));
+        tdDetalle.appendChild(lines);
+
+        const tdPrecio = el("td", "num price c-price", money.format(e.precio));
+        const tdPagado = el("td", "c-pay", e.pagado);
+
+        const tdReparto = el("td", "c-rep");
+        const sel = el("select", "row-sel");
+        sel.setAttribute("aria-label", `Reparto de ${describe(e)}`);
+        fillReparto(sel, repartoValue(e));
+        sel.addEventListener("change", () => {
+          if (sel.value === "pick") {
+            const before = repartoValue(e);
+            openPicker(
+              parseReparto(before),
+              (r) => {
+                e.reparto = r;
+                save();
+                render();
+              },
+              () => fillReparto(sel, repartoValue(e))
+            );
+            return;
+          }
+          e.reparto = parseReparto(sel.value);
+          save();
+          renderSplit(currentValid());
+          sel.title = sel.value.startsWith("varios:") ? participants(e.reparto).join(", ") : "";
+        });
+        tdReparto.appendChild(sel);
+
+        const tdAccion = el("td", "sticky-act c-act");
+        const acts = el("div", "acts");
+        acts.appendChild(editButton(e, "Editar"));
+
+        const del = el("button", "icon-btn danger");
+        del.type = "button";
+        del.setAttribute("aria-label", `Eliminar ${describe(e)}`);
+        del.title = "Eliminar";
+        del.appendChild(icon("trash"));
+        del.addEventListener("click", () => removeExpense(e));
+
+        acts.appendChild(del);
+        tdAccion.appendChild(acts);
+
+        tr.append(tdTipo, tdDetalle, tdPrecio, tdPagado, tdReparto, tdAccion);
+        return tr;
+      }
+
+      function typeBadge(e) {
+        const medio = e.tipo === "transporte" && e.detalle && MEDIOS[e.detalle.medio] ? e.detalle.medio : "";
+        const badge = el("span", "badge");
+        const chip = el("span", "chip-i");
+        chip.appendChild(icon(medio ? "m-" + medio : e.tipo));
+        badge.append(chip, document.createTextNode(medio ? MEDIOS[medio] : LABELS[e.tipo]));
+        if (e.id === editingId) badge.appendChild(el("span", "tag edit", "Editando"));
+        return badge;
+      }
+
+      function editButton(e, label) {
+        const edit = el("button", "icon-btn");
+        edit.type = "button";
+        edit.setAttribute("aria-label", `${label} ${describe(e)}`);
+        edit.title = label;
+        edit.appendChild(icon("edit"));
+        edit.addEventListener("click", () => startEdit(e));
+        return edit;
+      }
+
+      // Hitos que no suman: llegada otro día, vuelta y salida del alojamiento
+      function markerNodes(item) {
+        const e = item.e;
+        const d = e.detalle || {};
+        const nodes = [];
+
+        if (item.kind === "llegada") {
+          nodes.push(titleNode(`Llegada a ${d.destino || "destino"}`, d.compania));
+          nodes.push(line("Hora", item.time || "Sin hora"));
+          nodes.push(el("p", "mk-note", `Salió el ${dateTime(d.idaFecha, d.idaHora)}. El importe cuenta el día de salida.`));
+        } else if (item.kind === "vuelta") {
+          const route = [d.destino, d.origen].filter(Boolean).join("  →  ");
+          nodes.push(titleNode(route || "Vuelta", d.compania));
+          nodes.push(line("Salida", item.time || "Sin hora"));
+          nodes.push(el("p", "mk-note", "Incluida en el importe del billete de ida."));
+        } else {
+          nodes.push(titleNode(`Salida de ${d.nombre || "alojamiento"}`, d.ciudad));
+          const n = dayDiff(d.entrada, d.salida);
+          nodes.push(el("p", "mk-note", `Fin de la estancia: ${plural(n, "noche", "noches")} desde el ${formatDate(d.entrada)}.`));
+        }
+        return nodes;
+      }
+
+      function markerRow(item, first, last, dayTd) {
+        const e = item.e;
+        const tr = el("tr", `row marker ${e.tipo}`);
+        if (first) tr.classList.add("first");
+        if (last) tr.classList.add("last");
+        if (e.id === editingId) tr.classList.add("editing");
+        tr.dataset.id = e.id;
+        tr.dataset.marker = item.kind;
+
+        if (dayTd) tr.appendChild(dayTd);
+
+        const tdTipo = el("td", "c-tipo");
+        tdTipo.appendChild(typeBadge(e));
+
+        const tdDet = el("td", "c-det");
+        tdDet.colSpan = 4;
+        const lines = el("div", "lines");
+        markerNodes(item).forEach((n) => lines.appendChild(n));
+        tdDet.appendChild(lines);
+
+        const tdAct = el("td", "sticky-act c-act");
+        const acts = el("div", "acts");
+        acts.appendChild(editButton(e, "Editar reserva"));
+        tdAct.appendChild(acts);
+
+        tr.append(tdTipo, tdDet, tdAct);
+        return tr;
+      }
+
+      function dayHeadRow(dateIso, subtotal) {
+        const d = parseDate(dateIso);
+        const tr = el("tr", "day-head");
+        const td = el("td");
+        td.colSpan = 7;
+        td.append(
+          el("span", "dh-wd", d.toLocaleDateString("es-ES", { weekday: "short" }).replace(".", "")),
+          el("span", "dh-dn", String(d.getDate())),
+          el("span", "dh-mo", d.toLocaleDateString("es-ES", { month: "short" }).replace(".", "") + " " + d.getFullYear())
+        );
+        if (subtotal > 0) td.appendChild(el("span", "dh-sub", money.format(subtotal)));
+        tr.appendChild(td);
+        return tr;
+      }
+
+      function spacerRow() {
+        const spacer = el("tr", "spacer");
+        const td = el("td");
+        td.colSpan = 7;
+        spacer.appendChild(td);
+        return spacer;
+      }
+
+      const dayMonth = (iso) =>
+        parseDate(iso).toLocaleDateString("es-ES", { day: "numeric", month: "short" }).replace(/\./g, "");
+
+      function gapRow(from, to) {
+        const days = dayDiff(from, to) + 1;
+        const tr = el("tr", "gap");
+        const td = el("td");
+        td.colSpan = 7;
+        const range = days === 1 ? dayMonth(from) : `${dayMonth(from)} – ${dayMonth(to)}`;
+        td.append(el("b", "", range), document.createTextNode(days === 1 ? " · sin planes" : ` · ${days} días sin planes`));
+        tr.appendChild(td);
+        return tr;
+      }
+
+      /* ---------- Línea de tiempo ---------- */
+      function compareItems(a, b) {
+        return (
+          a.date.localeCompare(b.date) ||
+          (a.rank - b.rank) ||
+          a.time.localeCompare(b.time) ||
+          (a.e.id - b.e.id) ||
+          (a.kind === "expense" ? -1 : 0) - (b.kind === "expense" ? -1 : 0)
+        );
+      }
+
+      function buildItems(valid) {
+        const items = [];
+        valid.forEach((e) => {
+          const d = e.detalle || {};
+          items.push({ kind: "expense", e, date: dateOf(e), rank: RANK[e.tipo], time: timeOf(e) });
+
+          if (e.tipo === "transporte") {
+            if (d.llegadaFecha && d.llegadaFecha !== d.idaFecha) {
+              items.push({ kind: "llegada", e, date: d.llegadaFecha, rank: RANK.transporte, time: d.llegadaHora || "" });
+            }
+            if (d.vueltaFecha) {
+              items.push({ kind: "vuelta", e, date: d.vueltaFecha, rank: RANK.transporte, time: d.vueltaHora || "" });
+            }
+          }
+          if (e.tipo === "alojamiento" && d.salida && d.salida !== d.entrada) {
+            items.push({ kind: "salida", e, date: d.salida, rank: RANK_CHECKOUT, time: "" });
+          }
+        });
+        return items.sort(compareItems);
+      }
+
+      // Días del viaje sin nada: ni gastos, ni hitos, ni noche en un alojamiento
+      function findGaps(items, valid) {
+        const win = windowRange();
+        if (!win || !valid.length || dayDiff(win.inicio, win.fin) + 1 > 120) return [];
+
+        const covered = new Set(items.map((i) => i.date));
+        valid.forEach((e) => {
+          const d = e.detalle || {};
+          if (e.tipo === "alojamiento" && d.entrada && d.salida) {
+            for (let day = d.entrada; day < d.salida; day = addDays(day, 1)) covered.add(day);
+          }
+        });
+
+        const runs = [];
+        for (let day = win.inicio; day <= win.fin; day = addDays(day, 1)) {
+          if (covered.has(day)) continue;
+          const last = runs[runs.length - 1];
+          if (last && addDays(last.to, 1) === day) last.to = day;
+          else runs.push({ from: day, to: day });
+        }
+        return runs;
+      }
+
+      /* ---------- Render ---------- */
+      const currentValid = () => expenses.filter((e) => LABELS[e.tipo] && dateOf(e)).sort(compare);
+
+      function render() {
+        const valid = currentValid();
+
+        const all = buildItems(valid);
+        const groups = new Map();
+        all.forEach((item) => {
+          if (!groups.has(item.date)) groups.set(item.date, []);
+          groups.get(item.date).push(item);
+        });
+
+        // Línea de tiempo: días con contenido y tramos vacíos, en orden cronológico
+        const timeline = [
+          ...[...groups.entries()].map(([date, items]) => ({ date, items })),
+          ...findGaps(all, valid).map((run) => ({ date: run.from, gap: run })),
+        ].sort((a, b) => a.date.localeCompare(b.date));
+
+        body.textContent = "";
+
+        timeline.forEach((entry) => {
+          if (entry.gap) {
+            body.append(gapRow(entry.gap.from, entry.gap.to), spacerRow());
+            return;
+          }
+
+          const items = entry.items;
+          const subtotal = items.reduce((sum, i) => sum + (i.kind === "expense" ? i.e.precio : 0), 0);
+          body.appendChild(dayHeadRow(entry.date, subtotal));
+
+          items.forEach((item, i) => {
+            const first = i === 0;
+            const last = i === items.length - 1;
+            const dayTd = first ? dayCell(entry.date, items.length, subtotal) : null;
+            body.appendChild(
+              item.kind === "expense" ? expenseRow(item.e, first, last, dayTd) : markerRow(item, first, last, dayTd)
+            );
+          });
+
+          body.appendChild(spacerRow());
+        });
+
+        const totals = { transporte: 0, alojamiento: 0, excursion: 0 };
+        valid.forEach((e) => { totals[e.tipo] += e.precio; });
+        const total = totals.transporte + totals.alojamiento + totals.excursion;
+
+        for (const key in totals) {
+          const pct = total > 0 ? (totals[key] / total) * 100 : 0;
+          $("sum-" + key).textContent = money.format(totals[key]);
+          $("bar-" + key).style.width = pct + "%";
+          $("pct-" + key).textContent = `${Math.round(pct)} % del total`;
+        }
+
+        $("total").textContent = money.format(total);
+        $("stat-total").textContent = money.format(total);
+        $("stat-count").textContent = plural(valid.length, "gasto", "gastos");
+
+        emptyEl.hidden = valid.length > 0;
+        $("itinerario").classList.toggle("is-empty", valid.length === 0);
+        $("itinerario").querySelector(".table-card").classList.toggle("is-empty", valid.length === 0);
+        $("desglose").hidden = valid.length === 0;
+
+        renderTravelers();
+        const repSel = $("p-reparto");
+        setFormReparto(repSel.value === "pick" ? repSel.dataset.prev || "todos" : repSel.value);
+        renderSplit(valid);
+        updateHero(valid);
+        lastAdded = null;
+      }
+
+      /* ---------- Datos guardados: se sanean al cargar ---------- */
+      function normalizeData() {
+        const seen = new Set();
+        let nextId = Date.now();
+
+        expenses = expenses
+          .filter((e) => LABELS[e.tipo])
+          .map((e) => {
+            let id = Number(e.id);
+            if (!Number.isFinite(id) || seen.has(id)) id = nextId++;
+            seen.add(id);
+
+            const price = typeof e.precio === "string" ? parseFloat(e.precio.replace(",", ".")) : Number(e.precio);
+            const detalle = e.detalle && typeof e.detalle === "object" ? e.detalle : {};
+            Object.keys(detalle).forEach((k) => { if (detalle[k] == null) detalle[k] = ""; });
+            if (e.tipo === "transporte" && !MEDIOS[detalle.medio]) detalle.medio = "";
+
+            return {
+              ...e,
+              id,
+              detalle,
+              precio: Number.isFinite(price) && price >= 0 ? price : 0,
+              pagado: typeof e.pagado === "string" ? e.pagado.trim() : "",
+              reparto: e.reparto && typeof e.reparto === "object" ? e.reparto : { modo: "todos" },
+            };
+          });
+
+        // Quien aparece como pagador debe estar en la lista de viajeros, para que el desglose cuadre
+        const known = new Set(travelers.map(nameKey));
+        expenses.forEach((e) => {
+          if (e.pagado && !known.has(nameKey(e.pagado))) {
+            travelers.push(e.pagado);
+            known.add(nameKey(e.pagado));
+          }
+          // Un pagador escrito con otras mayúsculas se unifica con el viajero existente
+          const match = travelers.find((t) => nameKey(t) === nameKey(e.pagado));
+          if (match) e.pagado = match;
+        });
+
+        save();
+        saveTravelers();
+      }
+
+      /* ---------- Inicio ---------- */
+      try {
+        destInput.value = localStorage.getItem(DEST_KEY) || "";
+      } catch {}
+      applyDestination(destInput.value);
+
+      normalizeData();
+      buildMedioChips();
+      setFormReparto("todos");
+      renderTripInputs();
+      updateForm();
+      render();
+    })();
+  </script>
+</body>
+</html>
